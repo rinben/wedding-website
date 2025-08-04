@@ -1,0 +1,14 @@
+# Node.js
+# /client/
+node_modules/
+dist/
+
+# Python
+# /server/
+__pycache__/
+.venv/
+venv/
+
+
+# Environment Varianbles
+.env
