@@ -50,12 +50,40 @@ function Rsvp() {
     setGuestList(updatedGuestList);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Main Guest Data:', formData);
-    console.log('Additional Guest Data:', guestList);
-    // Here is where we'll send all this data to our backend
+
+    // Combine the main guest data and additional guest data
+    const fullRsvpData = {
+      mainGuest: formData,
+      additionalGuests: guestList,
+    };
+
+    try {
+      // Send the data to your Flask backend
+      const response = await fetch('http://localhost:5000/api/rsvp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(fullRsvpData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Success:', result.message);
+        alert(result.message); // Show a success message
+        // You can clear the form here if you want
+      } else {
+        console.error('Failed to submit form.');
+        alert('There was an error submitting your RSVP.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('There was an error connecting to the server.');
+    }
   };
+
 
   return (
     <div>
