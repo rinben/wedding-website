@@ -3,7 +3,7 @@ import React from 'react';
 
 function About() {
   return (
-    <section>
+    <section id="about-us">
       <h2>About the Couple</h2>
       <p>This is where you'll tell your love story! Talk about how you met, some of your favorite memories together, and what you're excited for in the future.</p>
     </section>

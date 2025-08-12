@@ -1,11 +1,11 @@
-// src/App.jsx
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import About from './components/About';
 import Timeline from './components/Timeline';
 import Rsvp from './components/Rsvp';
-import Photos from './components/Photos';
+import Travel from './components/Travel';
+import Registry from './components/Registry';
 
 function App() {
   return (
@@ -20,7 +20,8 @@ function App() {
           </>
         } />
         <Route path="/rsvp" element={<Rsvp />} />
-        <Route path="/photos" element={<Photos />} />
+        <Route path="/travel" element={<Travel />} />
+        <Route path="/registry" element={<Registry />} />
       </Routes>
     </>
   );
