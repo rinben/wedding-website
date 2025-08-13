@@ -28,6 +28,9 @@ function NavBar() {
           <Link to="/travel">Travel</Link>
         </li>
         <li>
+          <Link to="/Photos">Photos</Link>
+        </li>
+        <li>
           <Link to="/registry">Registry</Link>
         </li>
         {user && user.isLoggedIn && (

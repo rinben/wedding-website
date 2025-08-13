@@ -6,6 +6,7 @@ import About from "./components/About";
 import Timeline from "./components/Timeline";
 import Rsvp from "./components/Rsvp";
 import Travel from "./components/Travel";
+import Photos from "./components/Photos";
 import Registry from "./components/Registry";
 import AdminDashboard from "./components/AdminDashboard";
 import LoginPage from "./components/LoginPage";
@@ -29,6 +30,7 @@ function App() {
         />
         <Route path="/rsvp" element={<Rsvp />} />
         <Route path="/travel" element={<Travel />} />
+        <Route path="/photos" element={<Photos />} />\
         <Route path="/registry" element={<Registry />} />
         <Route
           path="/admin"

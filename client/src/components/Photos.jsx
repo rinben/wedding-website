@@ -1,5 +1,5 @@
 // src/components/Photos.jsx
-import React from 'react';
+import React from "react";
 
 function Photos() {
   return (
