@@ -4,7 +4,7 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, jwt_required
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
@@ -137,6 +137,7 @@ def login():
         return jsonify({"msg": "Invalid username or password"}), 401
 
 @app.route('/api/rsvps', methods=['GET'])
+@jwt_required() # Add this line to protect the route
 def get_rsvps():
     rsvps = db.session.execute(db.select(Rsvp)).scalars()
     return jsonify([serialize_rsvp(rsvp) for rsvp in rsvps])

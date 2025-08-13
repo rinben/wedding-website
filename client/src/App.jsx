@@ -1,3 +1,4 @@
+// src/App.jsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
@@ -8,10 +9,12 @@ import Travel from "./components/Travel";
 import Registry from "./components/Registry";
 import AdminDashboard from "./components/AdminDashboard";
 import LoginPage from "./components/LoginPage";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
-    <>
+    <AuthProvider>
       <NavBar />
       <Routes>
         <Route
@@ -27,10 +30,17 @@ function App() {
         <Route path="/rsvp" element={<Rsvp />} />
         <Route path="/travel" element={<Travel />} />
         <Route path="/registry" element={<Registry />} />
-        <Route path="/admin" element={<AdminDashboard />} />{" "}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/login" element={<LoginPage />} />
       </Routes>
-    </>
+    </AuthProvider>
   );
 }
 
