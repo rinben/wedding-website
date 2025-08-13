@@ -6,7 +6,6 @@ from flask_migrate import Migrate
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 
-# Configure the database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///wedding.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -29,6 +28,26 @@ class AdditionalGuest(db.Model):
     guest_dietary_restrictions = db.Column(db.Text)
     rsvp_id = db.Column(db.Integer, db.ForeignKey('rsvp.id'), nullable=False)
 
+# Helper function to serialize guest objects
+def serialize_guest(guest):
+    return {
+        'id': guest.id,
+        'guestName': guest.guest_name,
+        'guestDietaryRestrictions': guest.guest_dietary_restrictions,
+    }
+
+# Helper function to serialize RSVP objects
+def serialize_rsvp(rsvp):
+    return {
+        'id': rsvp.id,
+        'name': rsvp.name,
+        'attending': rsvp.attending,
+        'plusOne': rsvp.plus_one,
+        'dietaryRestrictions': rsvp.dietary_restrictions,
+        'createdAt': rsvp.created_at.isoformat() if rsvp.created_at else None,
+        'additionalGuests': [serialize_guest(g) for g in rsvp.additional_guests],
+    }
+
 @app.route('/')
 def home():
     return jsonify(message="Welcome to the wedding website backend!")
@@ -40,7 +59,6 @@ def rsvp():
         main_guest_data = data.get('mainGuest', {})
         additional_guests_data = data.get('additionalGuests', [])
 
-        # Create a new Rsvp object from the main guest data
         new_rsvp = Rsvp(
             name=main_guest_data.get('name'),
             attending=main_guest_data.get('attending'),
@@ -48,7 +66,6 @@ def rsvp():
             dietary_restrictions=main_guest_data.get('dietaryRestrictions')
         )
 
-        # Add additional guests if they exist
         for guest_info in additional_guests_data:
             new_guest = AdditionalGuest(
                 guest_name=guest_info.get('guestName'),
@@ -56,7 +73,6 @@ def rsvp():
             )
             new_rsvp.additional_guests.append(new_guest)
 
-        # Add the new RSVP and guests to the database session
         db.session.add(new_rsvp)
         db.session.commit()
 
@@ -64,8 +80,13 @@ def rsvp():
 
     except Exception as e:
         print("Database error:", e)
-        db.session.rollback() # Rollback the session on error
+        db.session.rollback()
         return jsonify(message="An error occurred while saving your RSVP."), 500
+
+@app.route('/api/rsvps', methods=['GET'])
+def get_rsvps():
+    rsvps = db.session.execute(db.select(Rsvp)).scalars()
+    return jsonify([serialize_rsvp(rsvp) for rsvp in rsvps])
 
 if __name__ == '__main__':
     app.run(debug=True)
