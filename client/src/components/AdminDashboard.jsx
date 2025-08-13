@@ -8,8 +8,17 @@ function AdminDashboard() {
 
   useEffect(() => {
     const fetchRsvps = async () => {
+      // Get the JWT token from local storage
+      const token = localStorage.getItem("access_token");
+
       try {
-        const response = await fetch("http://localhost:5000/api/rsvps");
+        const response = await fetch("http://localhost:5000/api/rsvps", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -29,6 +38,7 @@ function AdminDashboard() {
   if (error) return <div>Error: {error.message}</div>;
 
   return (
+    // ... (the rest of the component's JSX is unchanged)
     <div>
       <h2>Admin Dashboard</h2>
       <h3>Submitted RSVPs ({rsvps.length})</h3>
