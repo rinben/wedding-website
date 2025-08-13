@@ -38,6 +38,13 @@ class AdditionalGuest(db.Model):
     guest_dietary_restrictions = db.Column(db.Text)
     rsvp_id = db.Column(db.Integer, db.ForeignKey('rsvp.id'), nullable=False)
 
+# Add a new User model
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+
+
 # Helper function to serialize guest objects
 def serialize_guest(guest):
     return {
