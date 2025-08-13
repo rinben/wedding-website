@@ -22,15 +22,16 @@ function App() {
           path="/"
           element={
             <>
-              <div
-                className="homepage-hero-bg"
+              <section
+                className="hero-section"
                 style={{ backgroundImage: "url(/benandsara_frontpage.jpg)" }}
-              ></div>
-              <div className="homepage-scrolling-content">
-                <h1 className="homepage-title">Ben & Sara's Wedding!</h1>
+              >
+                <h1 className="hero-title">Ben & Sara's Wedding!</h1>
+              </section>
+              <section className="content-section">
                 <About />
                 <Timeline />
-              </div>
+              </section>
             </>
           }
         />
