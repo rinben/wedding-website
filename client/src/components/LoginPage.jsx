@@ -1,12 +1,13 @@
-// src/components/LoginPage.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // Import the useAuth hook
 
 function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate(); // Add this line
+  const navigate = useNavigate();
+  const { login } = useAuth(); // Get the login function from the context
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,8 +24,8 @@ function LoginPage() {
 
       if (response.ok) {
         const data = await response.json();
-        // Save the JWT token for future use
-        localStorage.setItem("access_token", data.access_token);
+        // Call the login function from AuthContext to update the state
+        login(data.access_token);
         console.log("Login successful! Token:", data.access_token);
         // Redirect to the admin page
         navigate("/admin");
@@ -39,7 +40,6 @@ function LoginPage() {
   };
 
   return (
-    // ... (rest of the component's JSX is unchanged)
     <div>
       <h2>Admin Login</h2>
       <form onSubmit={handleSubmit}>
