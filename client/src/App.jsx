@@ -7,6 +7,7 @@ import Rsvp from "./components/Rsvp";
 import Travel from "./components/Travel";
 import Registry from "./components/Registry";
 import AdminDashboard from "./components/AdminDashboard";
+import LoginPage from "./components/LoginPage";
 
 function App() {
   return (
@@ -26,7 +27,8 @@ function App() {
         <Route path="/rsvp" element={<Rsvp />} />
         <Route path="/travel" element={<Travel />} />
         <Route path="/registry" element={<Registry />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />{" "}
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
     </>
   );
