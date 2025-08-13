@@ -93,6 +93,42 @@ def rsvp():
         db.session.rollback()
         return jsonify(message="An error occurred while saving your RSVP."), 500
 
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    username = data.get('username', None)
+    password = data.get('password', None)
+
+    if not username or not password:
+        return jsonify({"msg": "Username and password are required"}), 400
+
+    if User.query.filter_by(username=username).first():
+        return jsonify({"msg": "Username already exists"}), 409
+
+    # Hash the password before saving
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    new_user = User(username=username, password_hash=hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({"msg": "User created successfully"}), 201
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data.get('username', None)
+    password = data.get('password', None)
+
+    user = User.query.filter_by(username=username).first()
+
+    if user and bcrypt.check_password_hash(user.password_hash, password):
+        # Create a JWT token for the authenticated user
+        from flask_jwt_extended import create_access_token
+        access_token = create_access_token(identity=username)
+        return jsonify(access_token=access_token)
+    else:
+        return jsonify({"msg": "Invalid username or password"}), 401
+
 @app.route('/api/rsvps', methods=['GET'])
 def get_rsvps():
     rsvps = db.session.execute(db.select(Rsvp)).scalars()
