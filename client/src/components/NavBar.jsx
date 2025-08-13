@@ -2,6 +2,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import "./NavBar.css";
 
 function NavBar() {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ function NavBar() {
           <Link to="/travel">Travel</Link>
         </li>
         <li>
-          <Link to="/Photos">Photos</Link>
+          <Link to="/photos">Photos</Link>
         </li>
         <li>
           <Link to="/registry">Registry</Link>

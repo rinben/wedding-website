@@ -1,0 +1,35 @@
+/* src/HomePage.css */
+.homepage-container {
+  position: relative;
+  height: 200vh; /* A double-height container to allow for scrolling */
+  overflow-x: hidden;
+}
+
+.homepage-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
+
+.homepage-content {
+  position: absolute;
+  top: 100vh; /* Starts below the initial background image */
+  width: 100%;
+  padding-top: 2rem;
+  background-color: var(--color-background-2);
+}
+
+.homepage-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white; /* Will need to be adjusted based on image */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}

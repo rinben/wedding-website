@@ -1,0 +1,40 @@
+/* src/index.css */
+:root {
+  /* Define a vibrant, beachy color palette */
+  --color-primary: #007bff; /* A vibrant blue for links/buttons */
+  --color-secondary: #f8f9fa; /* A light background color */
+  --color-accent: #ffc107; /* A yellow accent color */
+  --color-background-1: #d7e9f7; /* A light sky blue */
+  --color-background-2: #f0f8ff; /* A slightly different off-white */
+  --color-text: #212529; /* A dark text color */
+  --font-cute: "Pacifico", cursive; /* A placeholder for a "cute" font */
+  --font-default: "Roboto", sans-serif;
+}
+
+/* Basic CSS Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-default);
+  color: var(--color-text);
+  background-color: var(--color-background-1);
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-cute);
+  margin-bottom: 0.5rem;
+}
+
+ul {
+  list-style-type: none;
+}

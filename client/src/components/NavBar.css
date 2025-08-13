@@ -1,0 +1,42 @@
+/* src/components/NavBar.css */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(5px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-title {
+  font-family: var(--font-cute);
+  font-size: 1.5rem;
+}
+
+.navbar-title a {
+  text-decoration: none;
+  color: var(--color-primary);
+}
+
+.navbar-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.navbar-links a {
+  text-decoration: none;
+  color: var(--color-text);
+  font-weight: bold;
+}
+
+.navbar-countdown span {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--color-primary);
+}

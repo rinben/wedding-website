@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
@@ -12,6 +11,7 @@ import AdminDashboard from "./components/AdminDashboard";
 import LoginPage from "./components/LoginPage";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import "./HomePage.css"; // Import the new CSS file
 
 function App() {
   return (
@@ -21,16 +21,25 @@ function App() {
         <Route
           path="/"
           element={
-            <>
-              <h1>Welcome to Our Wedding!</h1>
-              <About />
-              <Timeline />
-            </>
+            <div className="homepage-container">
+              <div
+                className="homepage-background"
+                style={{
+                  backgroundImage: "url(https://via.placeholder.com/1920x1080)",
+                }}
+              >
+                <h1 className="homepage-title">Welcome to Our Wedding!</h1>
+              </div>
+              <div className="homepage-content">
+                <About />
+                <Timeline />
+              </div>
+            </div>
           }
         />
         <Route path="/rsvp" element={<Rsvp />} />
         <Route path="/travel" element={<Travel />} />
-        <Route path="/photos" element={<Photos />} />\
+        <Route path="/photos" element={<Photos />} />
         <Route path="/registry" element={<Registry />} />
         <Route
           path="/admin"
