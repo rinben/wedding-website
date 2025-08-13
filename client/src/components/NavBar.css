@@ -4,7 +4,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.6); /* Semi-transparent background */
   backdrop-filter: blur(5px);
   position: fixed;
   top: 0;
@@ -12,6 +12,18 @@
   width: 100%;
   z-index: 10;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .navbar-title {
@@ -27,16 +39,33 @@
 .navbar-links {
   display: flex;
   gap: 1.5rem;
+  font-family: var(--font-default);
 }
 
 .navbar-links a {
   text-decoration: none;
   color: var(--color-text);
   font-weight: bold;
+  transition: color 0.3s ease;
 }
 
-.navbar-countdown span {
+.navbar-links a:hover {
+  color: var(--color-accent);
+}
+
+.countdown-timer {
+  font-family: var(--font-default);
   font-size: 1rem;
   font-weight: bold;
   color: var(--color-primary);
+}
+
+.navbar button {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
 }

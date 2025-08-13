@@ -2,6 +2,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Countdown from "./Countdown";
 import "./NavBar.css";
 
 function NavBar() {
@@ -10,38 +11,40 @@ function NavBar() {
 
   const handleLogout = () => {
     logout();
-    navigate("/"); // Redirect to homepage
+    navigate("/");
   };
 
   return (
-    <nav>
-      <ul>
-        <li>
-          <Link to="/">Home</Link>
-        </li>
-        <li>
-          <a href="#about-us">About Us</a>
-        </li>
-        <li>
-          <Link to="/rsvp">RSVP</Link>
-        </li>
-        <li>
-          <Link to="/travel">Travel</Link>
-        </li>
-        <li>
-          <Link to="/photos">Photos</Link>
-        </li>
-        <li>
-          <Link to="/registry">Registry</Link>
-        </li>
-        {user && user.isLoggedIn && (
+    <nav className="navbar">
+      <div className="navbar-left">
+        <ul className="navbar-links">
           <li>
-            <button onClick={handleLogout}>Logout</button>
+            <Link to="/">Home</Link>
           </li>
+          <li>
+            <a href="#about-us">About Us</a>
+          </li>
+          <li>
+            <Link to="/rsvp">RSVP</Link>
+          </li>
+          <li>
+            <Link to="/travel">Travel</Link>
+          </li>
+          <li>
+            <Link to="/photos">Photos</Link>
+          </li>
+          <li>
+            <Link to="/registry">Registry</Link>
+          </li>
+        </ul>
+      </div>
+      <div className="navbar-right">
+        <Countdown />
+        {user && user.isLoggedIn && (
+          <button onClick={handleLogout}>Logout</button>
         )}
-      </ul>
+      </div>
     </nav>
   );
 }
-
 export default NavBar;
