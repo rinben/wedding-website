@@ -1,11 +1,5 @@
 /* src/HomePage.css */
-.homepage-container {
-  position: relative;
-  height: 200vh; /* A double-height container to allow for scrolling */
-  overflow-x: hidden;
-}
-
-.homepage-background {
+.homepage-hero-bg {
   position: fixed;
   top: 0;
   left: 0;
@@ -13,23 +7,31 @@
   height: 100vh;
   background-size: cover;
   background-position: center;
+  background-attachment: fixed;
   z-index: -1;
 }
 
-.homepage-content {
-  position: absolute;
-  top: 100vh; /* Starts below the initial background image */
-  width: 100%;
-  padding-top: 2rem;
-  background-color: var(--color-background-2);
+.homepage-scrolling-content {
+  min-height: 200vh;
+  padding-top: 100vh;
+  background-color: var(
+    --color-background-2
+  ); /* This will be your second background */
+  background-image: url("/path/to/your-beach-photo.jpg"); /* Replace this with your second image */
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 .homepage-title {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white; /* Will need to be adjusted based on image */
+  position: relative; /* Changed from absolute to relative */
+  text-align: center;
+  color: white;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  z-index: 1;
+  margin-top: -50vh; /* Adjust as needed to center over the first background */
+  padding: 2rem;
+}
+
+.homepage-scrolling-content section {
+  padding: 2rem;
 }

@@ -21,20 +21,17 @@ function App() {
         <Route
           path="/"
           element={
-            <div className="homepage-container">
+            <>
               <div
-                className="homepage-background"
-                style={{
-                  backgroundImage: "url(https://via.placeholder.com/1920x1080)",
-                }}
-              >
-                <h1 className="homepage-title">Welcome to Our Wedding!</h1>
-              </div>
-              <div className="homepage-content">
+                className="homepage-hero-bg"
+                style={{ backgroundImage: "url(/benandsara_frontpage.jpg)" }}
+              ></div>
+              <div className="homepage-scrolling-content">
+                <h1 className="homepage-title">Ben & Sara's Wedding!</h1>
                 <About />
                 <Timeline />
               </div>
-            </div>
+            </>
           }
         />
         <Route path="/rsvp" element={<Rsvp />} />
