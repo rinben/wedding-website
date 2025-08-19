@@ -35,7 +35,6 @@ function App() {
             </>
           }
         />
-        />
         <Route path="/rsvp" element={<Rsvp />} />
         <Route path="/travel" element={<Travel />} />
         <Route path="/photos" element={<Photos />} />
