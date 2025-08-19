@@ -7,7 +7,7 @@
   text-align: center;
   margin-bottom: 3rem;
   font-size: 3rem;
-  color: var(--color-secondary);
+  color: var(--color-text);
 }
 
 .about-section-ben,
@@ -56,4 +56,14 @@
   max-width: 100%;
   height: auto;
   border-radius: 8px;
+}
+
+.about-paragraph {
+  margin-top: 1.5rem;
+}
+
+.about-signature {
+  font-style: italic;
+  text-align: right;
+  margin-top: 1rem;
 }

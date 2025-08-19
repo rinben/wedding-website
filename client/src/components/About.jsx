@@ -20,10 +20,22 @@ function About() {
         <div className="about-text">
           <h3>About Ben</h3>
           <p>
-            This is where you'll tell your story! Talk about how you met, some
-            of your favorite memories together, and what you're excited for in
-            the future.
+            Sara and I first crossed paths at the University at Buffalo, where
+            we were both in the marching band. While we had a brief introduction
+            in 2017 at a band party, our real story started the following year.
+            I was taking a break on the sidelines when I felt Sara playfully
+            kick my foot. Little did I know, that small interaction would be the
+            start of everything for us.
           </p>
+          <p className="about-paragraph">
+            I started spending as much time with her as I could, at band
+            practice and at parties. I finally got up the nerve to ask her out
+            in September. Within a month, I knew I loved her, and within a year,
+            I knew she was the one I wanted to marry. On July 16, 2024, I
+            finally asked her to be my wife. I can't wait to make more memories
+            with the person I love.
+          </p>
+          <p className="about-signature">- Ben</p>
         </div>
         <div className="about-photo">
           <img src="/ben-solo.jpg" alt="Ben" />
