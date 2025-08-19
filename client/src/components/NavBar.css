@@ -4,8 +4,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: rgba(255, 255, 255, 0.3); /* More transparent background */
-  backdrop-filter: blur(5px);
+  background-color: rgba(192, 207, 224, 0.3); /* More transparent background */
+  backdrop-filter: blur(2px);
   position: fixed;
   top: 0;
   left: 0;
@@ -33,13 +33,13 @@
 
 .navbar-title a {
   text-decoration: none;
-  color: var(--color-primary);
+  color: var(--color-secondary); /* Use the coral color for the main title */
 }
 
 .navbar-links {
   display: flex;
   gap: 1.5rem;
-  font-family: var(--font-default);
+  font-family: var(--font-cute);
 }
 
 .navbar-links a {
@@ -50,18 +50,18 @@
 }
 
 .navbar-links a:hover {
-  color: var(--color-accent);
+  color: var(--color-accent-1); /* Use an accent color for hover */
 }
 
 .countdown-timer {
   font-family: var(--font-default);
   font-size: 1rem;
   font-weight: bold;
-  color: var(--color-primary);
+  color: var(--color-secondary);
 }
 
 .navbar button {
-  background-color: var(--color-primary);
+  background-color: var(--color-secondary);
   color: white;
   border: none;
   padding: 0.5rem 1rem;

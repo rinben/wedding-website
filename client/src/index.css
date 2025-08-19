@@ -1,13 +1,19 @@
 /* src/index.css */
 :root {
-  /* Define a vibrant, beachy color palette */
-  --color-primary: #007bff; /* A vibrant blue for links/buttons */
-  --color-secondary: #f8f9fa; /* A light background color */
-  --color-accent: #ffc107; /* A yellow accent color */
-  --color-background-1: #d7e9f7; /* A light sky blue */
-  --color-background-2: #f0f8ff; /* A slightly different off-white */
-  --color-text: #212529; /* A dark text color */
-  --font-cute: "Pacifico", cursive; /* A placeholder for a "cute" font */
+  /* The color palette from your image */
+  --color-primary: #c0cfe0; /* Light Blue */
+  --color-secondary: #ef5356; /* Red/Coral */
+  --color-accent-1: #f2af3f; /* Orange */
+  --color-accent-2: #ffa090; /* Light Peach */
+  --color-highlight: #c5c463; /* Lime Yellow */
+
+  /* Other useful colors for consistency */
+  --color-text: #212529; /* A dark color for readability */
+  --color-text-light: #c0cfe0; /* Light color for text on dark backgrounds */
+  --color-background: #ffffff; /* A clean white background */
+
+  /* Fonts from your original request */
+  --font-cute: "Pacifico", cursive;
   --font-default: "Roboto", sans-serif;
 }
 
@@ -21,7 +27,7 @@
 body {
   font-family: var(--font-default);
   color: var(--color-text);
-  background-color: var(--color-background-1);
+  background-color: var(--color-background);
   line-height: 1.6;
 }
 
