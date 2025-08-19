@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import About from "./components/About";
 import Timeline from "./components/Timeline";
@@ -11,7 +11,18 @@ import AdminDashboard from "./components/AdminDashboard";
 import LoginPage from "./components/LoginPage";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import "./HomePage.css"; // Import the new CSS file
+import "./HomePage.css";
+import "./components/NavBar.css";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [pathname]);
+
+  return null;
+}
 
 function App() {
   const handleScrollToAbout = () => {

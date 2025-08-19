@@ -1,7 +1,7 @@
 // src/components/Countdown.jsx
 import React, { useState, useEffect } from "react";
 
-const weddingDate = new Date("2026-09-12T00:00:00");
+const weddingDate = new Date("2026-09-12T11:00:00");
 
 function Countdown() {
   const [timeLeft, setTimeLeft] = useState(getTimeUntilWedding());

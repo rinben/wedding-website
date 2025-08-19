@@ -14,13 +14,19 @@ function NavBar() {
     navigate("/");
   };
 
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-left">
+        <div className="navbar-title">
+          <Link to="/" onClick={handleScrollToTop}>
+            Ben & Sara's Wedding
+          </Link>
+        </div>
         <ul className="navbar-links">
-          <li>
-            <Link to="/">Home</Link>
-          </li>
           <li>
             <a href="#about-us">About Us</a>
           </li>
