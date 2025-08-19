@@ -14,6 +14,12 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import "./HomePage.css"; // Import the new CSS file
 
 function App() {
+  const handleScrollToAbout = () => {
+    const aboutSection = document.getElementById("about-us");
+    if (aboutSection) {
+      aboutSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
   return (
     <AuthProvider>
       <NavBar />
@@ -27,6 +33,9 @@ function App() {
                 style={{ backgroundImage: "url(/benandsara_frontpage.jpg)" }}
               >
                 <h1 className="hero-title">Ben & Sara's Wedding!</h1>
+                <a onClick={handleScrollToAbout} className="scroll-down-arrow">
+                  &#x25BC;
+                </a>
               </section>
               <section className="content-section">
                 <About />
