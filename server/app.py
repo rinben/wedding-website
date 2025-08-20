@@ -9,11 +9,9 @@ from flask_jwt_extended import JWTManager, jwt_required
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 
-# Configure the database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///wedding.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Configure Flask-JWT-Extended
 app.config['JWT_SECRET_KEY'] = 'your-super-secret-key' # Change this to a real, secure secret key
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False # For simplicity, we won't expire tokens
 
@@ -38,22 +36,30 @@ class AdditionalGuest(db.Model):
     guest_dietary_restrictions = db.Column(db.Text)
     rsvp_id = db.Column(db.Integer, db.ForeignKey('rsvp.id'), nullable=False)
 
-# Add a new User model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
 
+# This is the new model for our search-based RSVP
+class Guest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+    party_id = db.Column(db.String(100), nullable=False)
+    attending = db.Column(db.Boolean, default=False)
+    dietary_restrictions = db.Column(db.Text, default='')
 
-# Helper function to serialize guest objects
 def serialize_guest(guest):
     return {
         'id': guest.id,
-        'guestName': guest.guest_name,
-        'guestDietaryRestrictions': guest.guest_dietary_restrictions,
+        'first_name': guest.first_name,
+        'last_name': guest.last_name,
+        'party_id': guest.party_id,
+        'attending': guest.attending,
+        'dietary_restrictions': guest.dietary_restrictions,
     }
 
-# Helper function to serialize RSVP objects
 def serialize_rsvp(rsvp):
     return {
         'id': rsvp.id,
@@ -112,7 +118,6 @@ def register():
     if User.query.filter_by(username=username).first():
         return jsonify({"msg": "Username already exists"}), 409
 
-    # Hash the password before saving
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     new_user = User(username=username, password_hash=hashed_password)
     db.session.add(new_user)
@@ -129,7 +134,6 @@ def login():
     user = User.query.filter_by(username=username).first()
 
     if user and bcrypt.check_password_hash(user.password_hash, password):
-        # Create a JWT token for the authenticated user
         from flask_jwt_extended import create_access_token
         access_token = create_access_token(identity=username)
         return jsonify(access_token=access_token)
@@ -137,10 +141,27 @@ def login():
         return jsonify({"msg": "Invalid username or password"}), 401
 
 @app.route('/api/rsvps', methods=['GET'])
-@jwt_required() # Add this line to protect the route
+@jwt_required()
 def get_rsvps():
     rsvps = db.session.execute(db.select(Rsvp)).scalars()
     return jsonify([serialize_rsvp(rsvp) for rsvp in rsvps])
+
+@app.route('/api/search-guest', methods=['GET'])
+def search_guest():
+    query = request.args.get('name', '')
+    if not query:
+        return jsonify([])
+
+    guests = db.session.execute(
+        db.select(Guest).filter(
+            db.or_(
+                Guest.first_name.ilike(f'%{query}%'),
+                Guest.last_name.ilike(f'%{query}%')
+            )
+        )
+    ).scalars().all()
+
+    return jsonify([serialize_guest(g) for g in guests])
 
 if __name__ == '__main__':
     app.run(debug=True)
