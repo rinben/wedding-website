@@ -61,7 +61,7 @@ function Timeline() {
             <h4>We Met</h4>
             <p>
               Our real friendship and relationship began during marching band
-              practice.
+              practice when Sara playfully kicked Ben's foot.
             </p>
           </div>
         </div>
@@ -75,7 +75,10 @@ function Timeline() {
           </div>
           <div className="timeline-content">
             <h4>First Date</h4>
-            <p>We had our first date at Chipotle, and the rest was history!</p>
+            <p>
+              We had our first date at Chipotle. Before Ben could get up the
+              nerve to kiss Sara goodbye, Sara left with her friend Kaitlyn.
+            </p>
           </div>
         </div>
         <div
@@ -88,7 +91,10 @@ function Timeline() {
           </div>
           <div className="timeline-content">
             <h4>Said "I Love You"</h4>
-            <p>Ben knew he was in love within a month of their first date.</p>
+            <p>
+              Our friends kept saying that it was too early, but we both knew.
+              We had never felt love like this.
+            </p>
           </div>
         </div>
         {/* Secret Event: June 2020 */}
@@ -109,7 +115,10 @@ function Timeline() {
             className={`timeline-content secret-content ${showSecret["event5"] ? "is-shown" : ""}`}
           >
             <h4>Vacation to Matthews, VA</h4>
-            <p>Our first solo vacation together to Matthews, VA.</p>
+            <p>
+              Our first solo vacation together to Matthews, VA. Ask Ben about
+              his run in with a shark!
+            </p>
           </div>
         </div>
         {/* Secret Event: August 2020 */}
@@ -130,7 +139,10 @@ function Timeline() {
             className={`timeline-content secret-content ${showSecret["event6"] ? "is-shown" : ""}`}
           >
             <h4>Ben Moves into His Apartment</h4>
-            <p>We moved into Ben's first apartment together.</p>
+            <p>
+              Ben and his roommate Connor get an apartment in Buffalo to finish
+              college. Sara was over as often as she could be.
+            </p>
           </div>
         </div>
         {/* Secret Event: September 2020 */}
@@ -151,7 +163,10 @@ function Timeline() {
             className={`timeline-content secret-content ${showSecret["event7"] ? "is-shown" : ""}`}
           >
             <h4>Juniper Moves in with Ben</h4>
-            <p>We expanded our family with our beloved cat, Juniper!</p>
+            <p>
+              Juniper was Ben's family cat. Sara immediately fell in love with
+              her.
+            </p>
           </div>
         </div>
         {/* Secret Event: May 2021 */}
@@ -172,7 +187,7 @@ function Timeline() {
             className={`timeline-content secret-content ${showSecret["event8"] ? "is-shown" : ""}`}
           >
             <h4>Sara Graduates</h4>
-            <p>Sara graduated from the University at Buffalo.</p>
+            <p>Sara graduated from the University at Buffalo!</p>
           </div>
         </div>
         {/* Public Event: July 2021 */}
@@ -186,7 +201,10 @@ function Timeline() {
           </div>
           <div className="timeline-content">
             <h4>Sara Moved In</h4>
-            <p>The couple took a big step and moved in together.</p>
+            <p>
+              After Sara graduated, She fully moved into the apartment with Ben.
+              For the first time, we were living together without anyone else.
+            </p>
           </div>
         </div>
         {/* Secret Event: May 2022 */}
@@ -207,7 +225,7 @@ function Timeline() {
             className={`timeline-content secret-content ${showSecret["event10"] ? "is-shown" : ""}`}
           >
             <h4>Ben Graduates</h4>
-            <p>Ben graduated from the University at Buffalo.</p>
+            <p>Ben graduated from the University at Buffalo!</p>
           </div>
         </div>
         {/* Secret Event: September 2023 */}
@@ -228,7 +246,12 @@ function Timeline() {
             className={`timeline-content secret-content ${showSecret["event11"] ? "is-shown" : ""}`}
           >
             <h4>Vacation to California</h4>
-            <p>A memorable trip to California with some friends.</p>
+            <p>
+              A memorable trip to California. It felt like two vacations in one.
+              We had a week just the two of us, then we spent the weekend with
+              friends celebrating Eric and Bill.
+            </p>
+            <p>P.S. Ben buys the first engagement ring!</p>
           </div>
         </div>
         {/* Public Event: December 2023 */}
@@ -242,7 +265,10 @@ function Timeline() {
           </div>
           <div className="timeline-content">
             <h4>We Got a House</h4>
-            <p>Ben and Sara bought their first house together.</p>
+            <p>
+              Ben and Sara bought their first house together. Ask Ben how much
+              he loves laying new flooring!
+            </p>
           </div>
         </div>
         {/* Secret Event: January 2024 */}
@@ -264,6 +290,7 @@ function Timeline() {
           >
             <h4>Rinaldo Family Cruise</h4>
             <p>A fun-filled cruise with the Rinaldo family.</p>
+            <p>P.S. Ben is in contact with the jeweler to perfect the ring.</p>
           </div>
         </div>
         {/* Public Event: May 2024 */}
@@ -292,8 +319,20 @@ function Timeline() {
             <h3>July 16, 2024</h3>
           </div>
           <div className="timeline-content">
-            <h4>Ben Proposes</h4>
-            <p>Ben asked Sara to be his wife, and she said yes!</p>
+            <h4>
+              Ben Proposes while we are on a trip around Lake Michigan and Lake
+              Huron.
+            </h4>
+            <p>
+              We went on a week long road trip through Chicago, Upper Peninsula,
+              and the Manatoulin Islands. While exploring Sable Falls in the
+              upper peninsula of Michigan, Ben asked Sara to be his wife, and
+              she said yes! Ask us about the proposal!
+            </p>
+            <p>
+              P.S. Ben received the ring in the mail the day before we left for
+              our trip.
+            </p>
           </div>
         </div>
         {/* Secret Event: July 2025 */}
@@ -314,7 +353,11 @@ function Timeline() {
             className={`timeline-content secret-content ${showSecret["event16"] ? "is-shown" : ""}`}
           >
             <h4>Vacation to Maine</h4>
-            <p>We'll be taking a wonderful vacation to Maine this summer.</p>
+            <p>
+              To stick to our growing tradition, we take a road trip to Maine to
+              visit Bar Harbor, Acadia National Park, Portland and the coast of
+              Maine. Ask us about our favorite places!
+            </p>
           </div>
         </div>
         {/* Public Event: September 12, 2026 */}
