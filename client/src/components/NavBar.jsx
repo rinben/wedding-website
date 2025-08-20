@@ -28,7 +28,7 @@ function NavBar() {
         </div>
         <ul className="navbar-links">
           <li>
-            <a href="#about-us">About Us</a>
+            <Link to="/#about-us">About Us</Link>
           </li>
           <li>
             <Link to="/rsvp">RSVP</Link>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import About from "./components/About";
@@ -25,12 +25,24 @@ function ScrollToTop() {
 }
 
 function App() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === "#about-us") {
+      const aboutSection = document.getElementById("about-us");
+      if (aboutSection) {
+        aboutSection.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [location]);
+
   const handleScrollToAbout = () => {
     const aboutSection = document.getElementById("about-us");
     if (aboutSection) {
       aboutSection.scrollIntoView({ behavior: "smooth" });
     }
   };
+
   return (
     <AuthProvider>
       <NavBar />
