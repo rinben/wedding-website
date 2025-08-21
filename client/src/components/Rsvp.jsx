@@ -65,14 +65,33 @@ function Rsvp() {
     );
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Final RSVP submission:", partyGuests);
-    // Here we will eventually send the data to a new backend endpoint
-    alert("Thank you for your RSVP!");
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/update-rsvp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ guests: partyGuests }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit RSVP.");
+      }
+
+      alert("Thank you for your RSVP!");
+      setSelectedGuest(null);
+      setSearchQuery("");
+      setPartyGuests([]);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Render the search bar and results
   if (!selectedGuest) {
     return (
       <div className="rsvp-container">
@@ -99,7 +118,6 @@ function Rsvp() {
     );
   }
 
-  // Render the RSVP form for the selected party
   return (
     <div className="rsvp-container">
       <h2>Hello, {selectedGuest.first_name}!</h2>
@@ -116,9 +134,7 @@ function Rsvp() {
                   type="radio"
                   name={`attending-${guest.id}`}
                   value="true"
-                  checked={
-                    guest.attending === true || guest.attending === "true"
-                  }
+                  checked={guest.attending === true}
                   onChange={() => handleRsvpChange(guest.id, "attending", true)}
                 />
                 Yes, with pleasure!
@@ -128,9 +144,7 @@ function Rsvp() {
                   type="radio"
                   name={`attending-${guest.id}`}
                   value="false"
-                  checked={
-                    guest.attending === false || guest.attending === "false"
-                  }
+                  checked={guest.attending === false}
                   onChange={() =>
                     handleRsvpChange(guest.id, "attending", false)
                   }
@@ -138,7 +152,7 @@ function Rsvp() {
                 No, with regret.
               </label>
             </div>
-            {(guest.attending === true || guest.attending === "true") && (
+            {guest.attending && (
               <div>
                 <label htmlFor={`dietary-${guest.id}`}>
                   Dietary Restrictions:

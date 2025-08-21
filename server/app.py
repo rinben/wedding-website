@@ -214,16 +214,22 @@ def update_guest(guest_id):
     db.session.commit()
     return jsonify(serialize_guest(guest))
 
-@app.route('/api/guests/<int:guest_id>', methods=['DELETE'])
+@app.route('/api/guests/mass-delete', methods=['DELETE'])
 @jwt_required()
-def delete_guest(guest_id):
-    guest = db.session.get(Guest, guest_id)
-    if not guest:
-        return jsonify(message="Guest not found"), 404
+def mass_delete_guests():
+    guest_ids = request.json.get('ids', [])
+    if not guest_ids:
+        return jsonify(message="No guest IDs provided"), 400
 
-    db.session.delete(guest)
+    guests_to_delete = db.session.execute(
+        db.select(Guest).filter(Guest.id.in_(guest_ids))
+    ).scalars().all()
+
+    for guest in guests_to_delete:
+        db.session.delete(guest)
+
     db.session.commit()
-    return jsonify(message="Guest deleted successfully"), 200
+    return jsonify(message=f"Deleted {len(guests_to_delete)} guests successfully"), 200
 
 @app.route('/api/guests', methods=['POST'])
 @jwt_required()
@@ -274,22 +280,25 @@ def export_guests():
         download_name='guest_list.csv'
     )
 
-@app.route('/api/guests/mass-delete', methods=['DELETE'])
-@jwt_required()
-def mass_delete_guests():
-    guest_ids = request.json.get('ids', [])
-    if not guest_ids:
-        return jsonify(message="No guest IDs provided"), 400
+@app.route('/api/update-rsvp', methods=['POST'])
+def update_rsvp():
+    try:
+        data = request.json
+        updated_guests = data.get('guests', [])
 
-    guests_to_delete = db.session.execute(
-        db.select(Guest).filter(Guest.id.in_(guest_ids))
-    ).scalars().all()
+        for guest_data in updated_guests:
+            guest = db.session.get(Guest, guest_data['id'])
+            if guest:
+                guest.attending = guest_data['attending']
+                guest.dietary_restrictions = guest_data['dietary_restrictions']
 
-    for guest in guests_to_delete:
-        db.session.delete(guest)
+        db.session.commit()
+        return jsonify(message="RSVP updated successfully!"), 200
 
-    db.session.commit()
-    return jsonify(message=f"Deleted {len(guests_to_delete)} guests successfully"), 200
+    except Exception as e:
+        print("Error updating RSVP:", e)
+        db.session.rollback()
+        return jsonify(message="An error occurred while updating the RSVP."), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

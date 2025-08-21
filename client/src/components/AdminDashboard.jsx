@@ -17,7 +17,7 @@ function AdminDashboard() {
   const [selectedGuests, setSelectedGuests] = useState([]);
   const [sortKey, setSortKey] = useState("first_name");
   const [sortDirection, setSortDirection] = useState("asc");
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const token = localStorage.getItem("access_token");
 
   useEffect(() => {
@@ -237,6 +237,15 @@ function AdminDashboard() {
 
     if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
     if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+
+    // Secondary sort by party_id unless the primary sort is by name
+    if (sortKey !== "first_name") {
+      const aParty = a.party_id;
+      const bParty = b.party_id;
+      if (aParty < bParty) return -1;
+      if (aParty > bParty) return 1;
+    }
+
     return 0;
   });
 
@@ -247,15 +256,14 @@ function AdminDashboard() {
   return (
     <div className="admin-dashboard-container">
       <h2>Admin Dashboard</h2>
-
       <div className="admin-actions">
         <button onClick={handleExport}>Export Guest List</button>
-        <button
-          onClick={handleMassDelete}
-          disabled={selectedGuests.length === 0}
-        >
-          Delete Selected ({selectedGuests.length})
-        </button>
+        {selectedGuests.length > 0 && (
+          <button onClick={handleMassDelete}>
+            Delete Selected ({selectedGuests.length})
+          </button>
+        )}
+        <button onClick={fetchGuests}>Refresh</button>
       </div>
 
       <h3>Add New Guest</h3>
@@ -306,11 +314,12 @@ function AdminDashboard() {
             <th>
               <input
                 type="checkbox"
+                checked={selectedGuests.length === guests.length}
                 onChange={() =>
                   setSelectedGuests(
                     selectedGuests.length === guests.length
                       ? []
-                      : guests.map((g) => g.id),
+                      : sortedGuests.map((g) => g.id),
                   )
                 }
               />
