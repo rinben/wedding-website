@@ -1,0 +1,129 @@
+/* src/AdminDashboard.css */
+.admin-dashboard-container {
+  padding: 2rem;
+  font-family: var(--font-default);
+}
+
+.admin-dashboard-container h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.admin-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-actions button {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-guest-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.add-guest-form input,
+.add-guest-form button {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.add-guest-form button {
+  background-color: var(--color-secondary);
+  color: white;
+  cursor: pointer;
+}
+
+.guest-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.guest-list-table th,
+.guest-list-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.guest-list-table th {
+  background-color: var(--color-primary);
+  color: white;
+  cursor: pointer;
+}
+
+.guest-list-table th:hover {
+  background-color: #0069d9;
+}
+
+.guest-list-table tr:hover {
+  background-color: var(--color-background-2);
+}
+
+.guest-list-table td button {
+  background-color: var(--color-accent-1);
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.guest-list-table td button:last-child {
+  background-color: var(--color-secondary);
+}
+
+.edit-guest-form-container {
+  margin-top: 2rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.edit-guest-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  margin-top: 1rem;
+}
+
+.edit-guest-form input {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.edit-form-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.edit-form-buttons button {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}

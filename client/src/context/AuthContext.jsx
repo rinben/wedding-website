@@ -1,10 +1,17 @@
-// src/context/AuthContext.jsx
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+
+  // Check for an existing token on initial load
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      setUser({ isLoggedIn: true, token });
+    }
+  }, []);
 
   const login = (token) => {
     localStorage.setItem("access_token", token);

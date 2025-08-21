@@ -274,5 +274,22 @@ def export_guests():
         download_name='guest_list.csv'
     )
 
+@app.route('/api/guests/mass-delete', methods=['DELETE'])
+@jwt_required()
+def mass_delete_guests():
+    guest_ids = request.json.get('ids', [])
+    if not guest_ids:
+        return jsonify(message="No guest IDs provided"), 400
+
+    guests_to_delete = db.session.execute(
+        db.select(Guest).filter(Guest.id.in_(guest_ids))
+    ).scalars().all()
+
+    for guest in guests_to_delete:
+        db.session.delete(guest)
+
+    db.session.commit()
+    return jsonify(message=f"Deleted {len(guests_to_delete)} guests successfully"), 200
+
 if __name__ == '__main__':
     app.run(debug=True)
