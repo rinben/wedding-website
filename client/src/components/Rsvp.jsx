@@ -77,12 +77,12 @@ function Rsvp() {
     return (
       <div className="rsvp-container">
         <h2>Find Your RSVP</h2>
-        <p>Please enter your first or last name to find your invitation.</p>
+        <p>Please enter your first and last name to find your invitation.</p>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="First or last name"
+          placeholder="First and last name"
         />
         {loading && <p>Searching...</p>}
         {error && <p style={{ color: "red" }}>{error}</p>}

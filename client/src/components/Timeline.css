@@ -66,7 +66,9 @@
   flex-basis: 45%;
   padding: 1rem;
   text-align: left;
+  background-color: rgba(255, 255, 255, 0.8);
   border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .timeline-date {
@@ -105,8 +107,18 @@
     text-align: left;
   }
 
+  .timeline-dot {
+    left: 2rem;
+    transform: translate(-50%, -50%);
+  }
+
+  .timeline-date {
+    flex-basis: auto;
+  }
+
   .timeline-content {
     margin-left: 0;
     margin-right: 0;
+    text-align: left;
   }
 }

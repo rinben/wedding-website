@@ -4,8 +4,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: rgba(192, 207, 224, 0.3); /* More transparent background */
-  backdrop-filter: blur(2px);
+  background-color: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(5px);
   position: fixed;
   top: 0;
   left: 0;
@@ -33,13 +33,13 @@
 
 .navbar-title a {
   text-decoration: none;
-  color: var(--color-secondary); /* Use the coral color for the main title */
+  color: var(--color-secondary);
 }
 
 .navbar-links {
   display: flex;
   gap: 1.5rem;
-  font-family: var(--font-cute);
+  font-family: var(--font-default);
 }
 
 .navbar-links a {
@@ -50,7 +50,7 @@
 }
 
 .navbar-links a:hover {
-  color: var(--color-accent-1); /* Use an accent color for hover */
+  color: var(--color-accent-1);
 }
 
 .countdown-timer {
@@ -68,4 +68,77 @@
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 2rem;
+  height: 2rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 11;
+}
+
+.hamburger .bar {
+  width: 2rem;
+  height: 0.25rem;
+  background-color: var(--color-text);
+  border-radius: 10px;
+  transition: all 0.3s linear;
+}
+
+/* Hide the mobile title on desktop */
+.mobile-title-item {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Hide the desktop title on mobile */
+  .desktop-title {
+    display: none;
+  }
+
+  .navbar-left {
+    gap: 1rem;
+  }
+
+  .navbar-links {
+    display: none;
+    position: absolute;
+    flex-direction: column;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding-top: 6rem;
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(-100%);
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .navbar-links.open {
+    display: flex;
+    transform: translateX(0);
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .navbar-right {
+    position: absolute;
+    top: 1rem;
+    right: 2rem;
+  }
+
+  /* Show the mobile title in the menu on mobile */
+  .mobile-title-item {
+    display: block;
+  }
 }

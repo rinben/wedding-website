@@ -177,5 +177,6 @@ def search_guest():
 
     return jsonify([serialize_guest(g) for g in guests])
 
+
 if __name__ == '__main__':
     app.run(debug=True)

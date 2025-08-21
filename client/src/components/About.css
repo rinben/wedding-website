@@ -67,3 +67,20 @@
   text-align: right;
   margin-top: 1rem;
 }
+
+@media (max-width: 768px) {
+  .about-section-ben,
+  .about-section-sara {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .about-section-ben .about-photo {
+    order: -1;
+  }
+
+  .about-section-sara .about-photo {
+    order: -1;
+  }
+}
