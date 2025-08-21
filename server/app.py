@@ -1,10 +1,13 @@
 # server/app.py
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, jwt_required
+
+import io
+import csv
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
@@ -187,6 +190,89 @@ def get_party_members():
     ).scalars().all()
 
     return jsonify([serialize_guest(g) for g in guests])
+
+@app.route('/api/guests', methods=['GET'])
+@jwt_required()
+def get_all_guests():
+    guests = db.session.execute(db.select(Guest)).scalars().all()
+    return jsonify([serialize_guest(g) for g in guests])
+
+@app.route('/api/guests/<int:guest_id>', methods=['PUT', 'PATCH'])
+@jwt_required()
+def update_guest(guest_id):
+    guest = db.session.get(Guest, guest_id)
+    if not guest:
+        return jsonify(message="Guest not found"), 404
+
+    data = request.json
+    guest.first_name = data.get('first_name', guest.first_name)
+    guest.last_name = data.get('last_name', guest.last_name)
+    guest.party_id = data.get('party_id', guest.party_id)
+    guest.attending = data.get('attending', guest.attending)
+    guest.dietary_restrictions = data.get('dietary_restrictions', guest.dietary_restrictions)
+
+    db.session.commit()
+    return jsonify(serialize_guest(guest))
+
+@app.route('/api/guests/<int:guest_id>', methods=['DELETE'])
+@jwt_required()
+def delete_guest(guest_id):
+    guest = db.session.get(Guest, guest_id)
+    if not guest:
+        return jsonify(message="Guest not found"), 404
+
+    db.session.delete(guest)
+    db.session.commit()
+    return jsonify(message="Guest deleted successfully"), 200
+
+@app.route('/api/guests', methods=['POST'])
+@jwt_required()
+def add_guest():
+    data = request.json
+    new_guest = Guest(
+        first_name=data.get('first_name'),
+        last_name=data.get('last_name'),
+        party_id=data.get('party_id'),
+        attending=data.get('attending', False),
+        dietary_restrictions=data.get('dietary_restrictions', '')
+    )
+    db.session.add(new_guest)
+    db.session.commit()
+    return jsonify(serialize_guest(new_guest)), 201
+
+@app.route('/api/export-guests', methods=['GET'])
+@jwt_required()
+def export_guests():
+    guests = db.session.execute(db.select(Guest)).scalars().all()
+    if not guests:
+        return jsonify(message="No guests to export"), 404
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Write header
+    writer.writerow(['ID', 'First Name', 'Last Name', 'Party ID', 'Attending', 'Dietary Restrictions'])
+
+    # Write data
+    for guest in guests:
+        writer.writerow([
+            guest.id,
+            guest.first_name,
+            guest.last_name,
+            guest.party_id,
+            'Yes' if guest.attending else 'No',
+            guest.dietary_restrictions
+        ])
+
+    csv_file = io.BytesIO(output.getvalue().encode())
+    csv_file.seek(0)
+
+    return send_file(
+        csv_file,
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name='guest_list.csv'
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
