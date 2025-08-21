@@ -41,7 +41,6 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
 
-# This is the new model for our search-based RSVP
 class Guest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(100), nullable=False)
@@ -177,6 +176,17 @@ def search_guest():
 
     return jsonify([serialize_guest(g) for g in guests])
 
+@app.route('/api/party-members', methods=['GET'])
+def get_party_members():
+    party_id = request.args.get('party_id', '')
+    if not party_id:
+        return jsonify([])
+
+    guests = db.session.execute(
+        db.select(Guest).filter_by(party_id=party_id)
+    ).scalars().all()
+
+    return jsonify([serialize_guest(g) for g in guests])
 
 if __name__ == '__main__':
     app.run(debug=True)

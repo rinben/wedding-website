@@ -43,7 +43,7 @@ function Rsvp() {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:5000/api/search-guest?name=${guest.party_id}`,
+        `http://localhost:5000/api/party-members?party_id=${guest.party_id}`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch party members.");
