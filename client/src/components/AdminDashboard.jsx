@@ -1,3 +1,4 @@
+// src/components/AdminDashboard.jsx
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import "./AdminDashboard.css";
@@ -19,6 +20,7 @@ function AdminDashboard() {
   const [sortDirection, setSortDirection] = useState("asc");
   const { user } = useAuth();
   const token = localStorage.getItem("access_token");
+  const [originalPartyId, setOriginalPartyId] = useState(null);
 
   useEffect(() => {
     if (token) {
@@ -172,6 +174,7 @@ function AdminDashboard() {
 
   const handleEdit = (guest) => {
     setEditingGuest(guest);
+    setOriginalPartyId(guest.party_id);
   };
 
   const handleEditChange = (e) => {
@@ -184,6 +187,27 @@ function AdminDashboard() {
 
   const handleEditSave = async () => {
     try {
+      // Check if party ID has changed
+      if (editingGuest.party_id !== originalPartyId) {
+        const shouldUpdateParty = window.confirm(
+          `The party ID for this guest has changed. Would you like to update all guests in the original party (ID: ${originalPartyId}) to the new party ID (${editingGuest.party_id})?`,
+        );
+
+        if (shouldUpdateParty) {
+          await fetch("http://localhost:5000/api/party/update-id", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              old_party_id: originalPartyId,
+              new_party_id: editingGuest.party_id,
+            }),
+          });
+        }
+      }
+
       const response = await fetch(
         `http://localhost:5000/api/guests/${editingGuest.id}`,
         {
@@ -238,7 +262,6 @@ function AdminDashboard() {
     if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
     if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
 
-    // Secondary sort by party_id unless the primary sort is by name
     if (sortKey !== "first_name") {
       const aParty = a.party_id;
       const bParty = b.party_id;
@@ -256,6 +279,7 @@ function AdminDashboard() {
   return (
     <div className="admin-dashboard-container">
       <h2>Admin Dashboard</h2>
+
       <div className="admin-actions">
         <button onClick={handleExport}>Export Guest List</button>
         {selectedGuests.length > 0 && (

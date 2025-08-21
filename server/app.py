@@ -300,5 +300,25 @@ def update_rsvp():
         db.session.rollback()
         return jsonify(message="An error occurred while updating the RSVP."), 500
 
+@app.route('/api/party/update-id', methods=['PUT'])
+@jwt_required()
+def update_party_id():
+    data = request.json
+    old_party_id = data.get('old_party_id')
+    new_party_id = data.get('new_party_id')
+
+    if not old_party_id or not new_party_id:
+        return jsonify(message="Missing old_party_id or new_party_id"), 400
+
+    guests_to_update = db.session.execute(
+        db.select(Guest).filter_by(party_id=old_party_id)
+    ).scalars().all()
+
+    for guest in guests_to_update:
+        guest.party_id = new_party_id
+
+    db.session.commit()
+    return jsonify(message=f"Updated party ID for {len(guests_to_update)} guests"), 200
+
 if __name__ == '__main__':
     app.run(debug=True)
