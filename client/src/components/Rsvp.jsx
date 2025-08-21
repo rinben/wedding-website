@@ -1,188 +1,163 @@
-import React, { useState } from 'react';
+// src/components/Rsvp.jsx
+import React, { useState, useEffect } from "react";
 
 function Rsvp() {
-  const [formData, setFormData] = useState({
-    name: '',
-    attending: '',
-    plusOne: 0,
-    dietaryRestrictions: '',
-  });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedGuest, setSelectedGuest] = useState(null);
+  const [partyGuests, setPartyGuests] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const [guestList, setGuestList] = useState([]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-
-    // Reset plusOne and guestList if the user selects 'No'
-    if (name === 'attending' && value === 'No') {
-      setFormData((prevData) => ({
-        ...prevData,
-        plusOne: 0,
-        dietaryRestrictions: '',
-      }));
-      setGuestList([]);
-    }
-  };
-
-  const handlePlusOneChange = (e) => {
-    const numGuests = Number(e.target.value);
-    setFormData((prevData) => ({
-      ...prevData,
-      plusOne: numGuests,
-    }));
-
-    // Create an array of guests based on the number entered
-    const newGuestList = Array.from({ length: numGuests }, (_, index) => {
-      // Keep existing guest data if it exists
-      return guestList[index] || { guestName: '', guestDietaryRestrictions: '' };
-    });
-    setGuestList(newGuestList);
-  };
-
-  const handleGuestInfoChange = (index, e) => {
-    const { name, value } = e.target;
-    const updatedGuestList = [...guestList];
-    updatedGuestList[index][name] = value;
-    setGuestList(updatedGuestList);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Combine the main guest data and additional guest data
-    const fullRsvpData = {
-      mainGuest: formData,
-      additionalGuests: guestList,
-    };
-
-    try {
-      // Send the data to your Flask backend
-      const response = await fetch('http://localhost:5000/api/rsvp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(fullRsvpData),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Success:', result.message);
-        alert(result.message); // Show a success message
-        // You can clear the form here if you want
-      } else {
-        console.error('Failed to submit form.');
-        alert('There was an error submitting your RSVP.');
+  // This effect fetches search results as the user types
+  useEffect(() => {
+    const fetchGuests = async () => {
+      if (searchQuery.length < 2) {
+        setSearchResults([]);
+        return;
       }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('There was an error connecting to the server.');
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/search-guest?name=${searchQuery}`,
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch guest list.");
+        }
+        const data = await response.json();
+        setSearchResults(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    const debounceTimeout = setTimeout(fetchGuests, 300);
+    return () => clearTimeout(debounceTimeout);
+  }, [searchQuery]);
+
+  // This function is called when a user selects a guest
+  const handleGuestSelect = async (guest) => {
+    setSelectedGuest(guest);
+    // Fetch all guests in the same party
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/search-guest?name=${guest.party_id}`,
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch party members.");
+      }
+      const data = await response.json();
+      setPartyGuests(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleRsvpChange = (guestId, field, value) => {
+    setPartyGuests((prevGuests) =>
+      prevGuests.map((guest) =>
+        guest.id === guestId ? { ...guest, [field]: value } : guest,
+      ),
+    );
+  };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Final RSVP submission:", partyGuests);
+    // Here we will eventually send the data to a new backend endpoint
+    alert("Thank you for your RSVP!");
+  };
+
+  // Render the search bar and results
+  if (!selectedGuest) {
+    return (
+      <div className="rsvp-container">
+        <h2>Find Your RSVP</h2>
+        <p>Please enter your first or last name to find your invitation.</p>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="First or last name"
+        />
+        {loading && <p>Searching...</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        {searchResults.length > 0 && (
+          <ul>
+            {searchResults.map((guest) => (
+              <li key={guest.id} onClick={() => handleGuestSelect(guest)}>
+                {guest.first_name} {guest.last_name}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  }
+
+  // Render the RSVP form for the selected party
   return (
-    <div>
-      <h2>RSVP</h2>
-      <p>Please let us know if you can make it and tell us about any dietary needs you may have.</p>
-
+    <div className="rsvp-container">
+      <h2>Hello, {selectedGuest.first_name}!</h2>
+      <p>Please confirm your attendance for each member of your party.</p>
       <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="name">Full Name:</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <p>Will you be attending?</p>
-          <label>
-            <input
-              type="radio"
-              name="attending"
-              value="Yes"
-              checked={formData.attending === 'Yes'}
-              onChange={handleChange}
-              required
-            />{' '}
-            Yes, with pleasure!
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="attending"
-              value="No"
-              checked={formData.attending === 'No'}
-              onChange={handleChange}
-            />{' '}
-            No, with regret.
-          </label>
-        </div>
-
-        {/* Conditionally render this section if attending is 'Yes' */}
-        {formData.attending === 'Yes' && (
-          <>
+        {partyGuests.map((guest) => (
+          <div key={guest.id}>
+            <h4>
+              {guest.first_name} {guest.last_name}
+            </h4>
             <div>
-              <label htmlFor="plusOne">Number of Additional Guests:</label>
-              <input
-                type="number"
-                id="plusOne"
-                name="plusOne"
-                value={formData.plusOne}
-                onChange={handlePlusOneChange}
-                min="0"
-              />
+              <label>
+                <input
+                  type="radio"
+                  name={`attending-${guest.id}`}
+                  value="true"
+                  checked={
+                    guest.attending === true || guest.attending === "true"
+                  }
+                  onChange={() => handleRsvpChange(guest.id, "attending", true)}
+                />
+                Yes, with pleasure!
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name={`attending-${guest.id}`}
+                  value="false"
+                  checked={
+                    guest.attending === false || guest.attending === "false"
+                  }
+                  onChange={() =>
+                    handleRsvpChange(guest.id, "attending", false)
+                  }
+                />
+                No, with regret.
+              </label>
             </div>
-
-            <div>
-              <label htmlFor="dietaryRestrictions">Your Dietary Restrictions or Allergies:</label>
-              <textarea
-                id="dietaryRestrictions"
-                name="dietaryRestrictions"
-                value={formData.dietaryRestrictions}
-                onChange={handleChange}
-              ></textarea>
-            </div>
-
-            {/* Conditionally render guest info fields */}
-            {guestList.length > 0 && (
+            {(guest.attending === true || guest.attending === "true") && (
               <div>
-                <h3>Additional Guests Information</h3>
-                {guestList.map((guest, index) => (
-                  <div key={index}>
-                    <h4>Guest #{index + 1}</h4>
-                    <label htmlFor={`guestName-${index}`}>Full Name:</label>
-                    <input
-                      type="text"
-                      id={`guestName-${index}`}
-                      name="guestName"
-                      value={guest.guestName}
-                      onChange={(e) => handleGuestInfoChange(index, e)}
-                      required
-                    />
-                    <label htmlFor={`guestDietaryRestrictions-${index}`}>Dietary Restrictions:</label>
-                    <textarea
-                      id={`guestDietaryRestrictions-${index}`}
-                      name="guestDietaryRestrictions"
-                      value={guest.guestDietaryRestrictions}
-                      onChange={(e) => handleGuestInfoChange(index, e)}
-                    ></textarea>
-                  </div>
-                ))}
+                <label htmlFor={`dietary-${guest.id}`}>
+                  Dietary Restrictions:
+                </label>
+                <textarea
+                  id={`dietary-${guest.id}`}
+                  value={guest.dietary_restrictions}
+                  onChange={(e) =>
+                    handleRsvpChange(
+                      guest.id,
+                      "dietary_restrictions",
+                      e.target.value,
+                    )
+                  }
+                />
               </div>
             )}
-          </>
-        )}
-
+          </div>
+        ))}
         <button type="submit">Submit RSVP</button>
       </form>
     </div>

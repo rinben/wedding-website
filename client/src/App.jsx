@@ -13,6 +13,7 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./HomePage.css";
 import "./components/NavBar.css";
+import "./App.css";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -46,6 +47,7 @@ function App() {
   return (
     <AuthProvider>
       <NavBar />
+      <ScrollToTop />
       <Routes>
         <Route
           path="/"
@@ -67,19 +69,56 @@ function App() {
             </>
           }
         />
-        <Route path="/rsvp" element={<Rsvp />} />
-        <Route path="/travel" element={<Travel />} />
-        <Route path="/photos" element={<Photos />} />
-        <Route path="/registry" element={<Registry />} />
+        <Route
+          path="/rsvp"
+          element={
+            <div className="other-pages-container">
+              <Rsvp />
+            </div>
+          }
+        />
+        <Route
+          path="/travel"
+          element={
+            <div className="other-pages-container">
+              <Travel />
+            </div>
+          }
+        />
+        <Route
+          path="/registry"
+          element={
+            <div className="other-pages-container">
+              <Registry />
+            </div>
+          }
+        />
+        <Route
+          path="/photos"
+          element={
+            <div className="other-pages-container">
+              <Photos />
+            </div>
+          }
+        />
         <Route
           path="/admin"
           element={
             <ProtectedRoute>
-              <AdminDashboard />
+              <div className="other-pages-container">
+                <AdminDashboard />
+              </div>
             </ProtectedRoute>
           }
         />
-        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/login"
+          element={
+            <div className="other-pages-container">
+              <LoginPage />
+            </div>
+          }
+        />
       </Routes>
     </AuthProvider>
   );

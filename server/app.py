@@ -148,18 +148,32 @@ def get_rsvps():
 
 @app.route('/api/search-guest', methods=['GET'])
 def search_guest():
-    query = request.args.get('name', '')
+    query = request.args.get('name', '').strip()
     if not query:
         return jsonify([])
 
-    guests = db.session.execute(
-        db.select(Guest).filter(
-            db.or_(
-                Guest.first_name.ilike(f'%{query}%'),
-                Guest.last_name.ilike(f'%{query}%')
+    search_terms = query.split()
+
+    if len(search_terms) == 2:
+        first_name = search_terms[0]
+        last_name = search_terms[1]
+        guests = db.session.execute(
+            db.select(Guest).filter(
+                db.and_(
+                    Guest.first_name.ilike(f'%{first_name}%'),
+                    Guest.last_name.ilike(f'%{last_name}%')
+                )
             )
-        )
-    ).scalars().all()
+        ).scalars().all()
+    else:
+        guests = db.session.execute(
+            db.select(Guest).filter(
+                db.or_(
+                    Guest.first_name.ilike(f'%{query}%'),
+                    Guest.last_name.ilike(f'%{query}%')
+                )
+            )
+        ).scalars().all()
 
     return jsonify([serialize_guest(g) for g in guests])
 

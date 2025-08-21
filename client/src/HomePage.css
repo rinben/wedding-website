@@ -16,7 +16,7 @@
   left: 50%;
   transform: translateX(-50%);
   font-size: 2rem;
-  color: white;
+  color: var(--color-primary);
   text-decoration: none;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
   animation: bounce 2s infinite;
@@ -63,4 +63,9 @@
   padding: 2rem;
   margin-bottom: 2rem;
   border-radius: 8px;
+}
+
+/* Add padding to all other pages */
+.other-pages-container {
+  padding-top: 6rem;
 }
