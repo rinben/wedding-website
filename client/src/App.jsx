@@ -6,6 +6,7 @@ import Timeline from "./components/Timeline";
 import Rsvp from "./components/Rsvp";
 import Travel from "./components/Travel";
 import CanadaTravel from "./components/CanadaTravel";
+import BuffaloTravel from "./components/BuffaloTravel";
 import Photos from "./components/Photos";
 import Registry from "./components/Registry";
 import AdminDashboard from "./components/AdminDashboard";
@@ -91,6 +92,14 @@ function App() {
           element={
             <div className="other-pages-container">
               <CanadaTravel />
+            </div>
+          }
+        />
+        <Route
+          path="/travel/buffalo"
+          element={
+            <div className="other-pages-container">
+              <BuffaloTravel />
             </div>
           }
         />
