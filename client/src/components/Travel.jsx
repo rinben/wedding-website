@@ -65,23 +65,11 @@ function Travel() {
           <h3>Restaurants</h3>
           <img src="/restaurants-photo.webp" alt="Restaurants" />
           <p>
-            Crystal Beach and the surrounding area offer many great dining
-            options, from casual eateries to fine dining. We have listed a few
-            of our favorites for you to try.
+            Whether you are just looking for a drink or a great bite to eat,
+            there are many great places to visit in Crystal Beach and the
+            surrounding area.
           </p>
           <Link to="/travel/restaurants" className="travel-button">
-            Explore
-          </Link>
-        </div>
-        <div className="travel-card">
-          <h3>Bars</h3>
-          <img src="/bars-photo.jpg" alt="Bars" />
-          <p>
-            If you're looking for a place to grab a drink, there are many great
-            bars in the area. We have listed a few of our favorites for you to
-            check out.
-          </p>
-          <Link to="/travel/bars" className="travel-button">
             Explore
           </Link>
         </div>

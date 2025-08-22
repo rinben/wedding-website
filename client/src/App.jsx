@@ -7,6 +7,8 @@ import Rsvp from "./components/Rsvp";
 import Travel from "./components/Travel";
 import CanadaTravel from "./components/CanadaTravel";
 import BuffaloTravel from "./components/BuffaloTravel";
+import Restaurants from "./components/Restaurants";
+import Attractions from "./components/Attractions";
 import Photos from "./components/Photos";
 import Registry from "./components/Registry";
 import AdminDashboard from "./components/AdminDashboard";
@@ -100,6 +102,22 @@ function App() {
           element={
             <div className="other-pages-container">
               <BuffaloTravel />
+            </div>
+          }
+        />
+        <Route
+          path="/travel/restaurants"
+          element={
+            <div className="other-pages-container">
+              <Restaurants />
+            </div>
+          }
+        />
+        <Route
+          path="/travel/attractions"
+          element={
+            <div className="other-pages-container">
+              <Attractions />
             </div>
           }
         />
