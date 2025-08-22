@@ -54,10 +54,27 @@
 }
 
 .countdown-timer {
+  background-color: var(--color-secondary);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   font-family: var(--font-default);
-  font-size: 1rem;
+  color: var(--color-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.countdown-timer .countdown-text {
+  font-size: 0.75rem;
+  font-weight: normal;
+  margin-bottom: 0.25rem;
+  color: var(--color-text);
+}
+
+.countdown-timer .countdown-days {
+  font-size: 1.25rem;
   font-weight: bold;
-  color: var(--color-secondary);
 }
 
 .navbar button {
@@ -91,14 +108,24 @@
   transition: all 0.3s linear;
 }
 
-/* Hide the mobile title on desktop */
+.desktop-title {
+  display: block;
+}
+
 .mobile-title-item {
   display: none;
 }
 
+.countdown-mobile {
+  display: none;
+}
+
 @media (max-width: 768px) {
-  /* Hide the desktop title on mobile */
   .desktop-title {
+    display: none;
+  }
+
+  .desktop-countdown {
     display: none;
   }
 
@@ -137,8 +164,11 @@
     right: 2rem;
   }
 
-  /* Show the mobile title in the menu on mobile */
   .mobile-title-item {
+    display: block;
+  }
+
+  .countdown-mobile {
     display: block;
   }
 }

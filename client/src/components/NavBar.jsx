@@ -71,9 +71,12 @@ function NavBar() {
               <button onClick={handleLogout}>Logout</button>
             </li>
           )}
+          <li className="countdown-mobile">
+            <Countdown />
+          </li>
         </ul>
       </div>
-      <div className="navbar-right">
+      <div className="navbar-right desktop-countdown">
         <Countdown />
       </div>
     </nav>
