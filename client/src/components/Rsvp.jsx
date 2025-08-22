@@ -1,5 +1,6 @@
 // src/components/Rsvp.jsx
 import React, { useState, useEffect } from "react";
+import "./Rsvp.css";
 
 function Rsvp() {
   const [searchQuery, setSearchQuery] = useState("");
