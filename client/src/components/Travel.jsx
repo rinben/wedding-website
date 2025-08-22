@@ -15,7 +15,7 @@ function Travel() {
       <div className="travel-grid">
         <div className="travel-card">
           <h3>Airbnb</h3>
-          <img src="url(/airbnb-photo.jpg)" alt="Airbnb in Crystal Beach" />
+          <img src="/airbnb-photo.jpg" alt="Airbnb in Crystal Beach" />
           <p>
             There are many homes and cottages within walking distance of the
             venue that can be rented through Airbnb. Feel free to explore some
@@ -33,7 +33,7 @@ function Travel() {
         <div className="travel-card">
           <h3>Hotels & Cottages (Canada)</h3>
           <img
-            src="/path/to/canada-hotel-photo.jpg"
+            src="/canada-hotel-photo.jpeg"
             alt="Hotels in Crystal Beach, Canada"
           />
           <p>
@@ -47,10 +47,7 @@ function Travel() {
         </div>
         <div className="travel-card">
           <h3>Hotels (Buffalo)</h3>
-          <img
-            src="/path/to/buffalo-hotel-photo.jpg"
-            alt="Hotels in Buffalo, NY"
-          />
+          <img src="/buffalo-hotel-photo.jpg" alt="Hotels in Buffalo, NY" />
           <p>
             For our guests traveling from out of town, there are several
             convenient and beautiful hotels in the Buffalo area. Feel free to
@@ -66,7 +63,7 @@ function Travel() {
       <div className="travel-grid">
         <div className="travel-card">
           <h3>Restaurants</h3>
-          <img src="/path/to/restaurants-photo.jpg" alt="Restaurants" />
+          <img src="/restaurants-photo.webp" alt="Restaurants" />
           <p>
             Crystal Beach and the surrounding area offer many great dining
             options, from casual eateries to fine dining. We have listed a few
@@ -78,7 +75,7 @@ function Travel() {
         </div>
         <div className="travel-card">
           <h3>Bars</h3>
-          <img src="/path/to/bars-photo.jpg" alt="Bars" />
+          <img src="/bars-photo.jpg" alt="Bars" />
           <p>
             If you're looking for a place to grab a drink, there are many great
             bars in the area. We have listed a few of our favorites for you to
@@ -90,7 +87,7 @@ function Travel() {
         </div>
         <div className="travel-card">
           <h3>Attractions</h3>
-          <img src="/path/to/attractions-photo.jpg" alt="Attractions" />
+          <img src="/attractions-photo.jpeg" alt="Attractions" />
           <p>
             There are many fun things to do in the area, from exploring the
             beach to visiting a local museum. We have listed a few of our
