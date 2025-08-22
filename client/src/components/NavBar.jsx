@@ -57,11 +57,6 @@ function NavBar() {
             </Link>
           </li>
           <li>
-            <Link to="/photos" onClick={() => setIsOpen(false)}>
-              Photos
-            </Link>
-          </li>
-          <li>
             <Link to="/registry" onClick={() => setIsOpen(false)}>
               Registry
             </Link>
