@@ -5,6 +5,7 @@ import About from "./components/About";
 import Timeline from "./components/Timeline";
 import Rsvp from "./components/Rsvp";
 import Travel from "./components/Travel";
+import CanadaTravel from "./components/CanadaTravel";
 import Photos from "./components/Photos";
 import Registry from "./components/Registry";
 import AdminDashboard from "./components/AdminDashboard";
@@ -82,6 +83,14 @@ function App() {
           element={
             <div className="other-pages-container">
               <Travel />
+            </div>
+          }
+        />
+        <Route
+          path="/travel/canada"
+          element={
+            <div className="other-pages-container">
+              <CanadaTravel />
             </div>
           }
         />
