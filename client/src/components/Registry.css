@@ -1,0 +1,54 @@
+/* src/components/Registry.css */
+.registry-page-container {
+  padding: 2rem;
+  font-family: var(--font-default);
+  text-align: center;
+}
+
+.registry-page-container h2 {
+  font-size: 3rem;
+  color: var(--color-secondary);
+  margin-bottom: 1rem;
+}
+
+.registry-page-container p {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.registry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.registry-card {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.registry-card img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.registry-button {
+  display: inline-block;
+  background-color: var(--color-secondary);
+  color: white;
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.registry-button:hover {
+  background-color: #b3777d;
+}
