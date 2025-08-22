@@ -22,7 +22,7 @@ function CanadaTravel() {
         ></iframe>
       </div>
 
-      <h3>Hotels</h3>
+      <h3>Hotels and Motels</h3>
       <div className="travel-grid">
         <div className="travel-card">
           <h4>Hotel Name</h4>
@@ -32,20 +32,31 @@ function CanadaTravel() {
             Visit Website
           </a>
         </div>
-        {/* Add more hotel cards here */}
-      </div>
-
-      <h3>Motels</h3>
-      <div className="travel-grid">
         <div className="travel-card">
-          <h4>Motel Name</h4>
-          <img src="/path/to/motel-photo.jpg" alt="Motel Name" />
-          <p>A short description of the motel and its amenities.</p>
+          <h4>Hotel Name</h4>
+          <img src="/path/to/hotel-photo.jpg" alt="Hotel Name" />
+          <p>A short description of the hotel and its amenities.</p>
           <a href="#" className="travel-button">
             Visit Website
           </a>
         </div>
-        {/* Add more motel cards here */}
+        <div className="travel-card">
+          <h4>Hotel Name</h4>
+          <img src="/path/to/hotel-photo.jpg" alt="Hotel Name" />
+          <p>A short description of the hotel and its amenities.</p>
+          <a href="#" className="travel-button">
+            Visit Website
+          </a>
+        </div>
+        <div className="travel-card">
+          <h4>Hotel Name</h4>
+          <img src="/path/to/hotel-photo.jpg" alt="Hotel Name" />
+          <p>A short description of the hotel and its amenities.</p>
+          <a href="#" className="travel-button">
+            Visit Website
+          </a>
+        </div>
+        {/* Add more hotel cards here */}
       </div>
 
       <h3>Cottage Rentals</h3>
