@@ -137,7 +137,7 @@ function Rsvp() {
                   checked={guest.attending === true}
                   onChange={() => handleRsvpChange(guest.id, "attending", true)}
                 />
-                Yes, with pleasure!
+                Yes!
               </label>
               <label>
                 <input
@@ -149,7 +149,7 @@ function Rsvp() {
                     handleRsvpChange(guest.id, "attending", false)
                   }
                 />
-                No, with regret.
+                No.
               </label>
             </div>
             {guest.attending && (

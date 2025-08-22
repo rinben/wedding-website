@@ -133,6 +133,66 @@ def add_guest():
     db.session.commit()
     return jsonify(serialize_guest(new_guest)), 201
 
+@app.route('/api/guests/mass-delete', methods=['DELETE'])
+@jwt_required()
+def mass_delete_guests():
+    guest_ids = request.json.get('ids', [])
+    if not guest_ids:
+        return jsonify(message="No guest IDs provided"), 400
+
+    guests_to_delete = db.session.execute(
+        db.select(Guest).filter(Guest.id.in_(guest_ids))
+    ).scalars().all()
+
+    for guest in guests_to_delete:
+        db.session.delete(guest)
+
+    db.session.commit()
+    return jsonify(message=f"Deleted {len(guests_to_delete)} guests successfully"), 200
+
+@app.route('/api/search-guest', methods=['GET'])
+def search_guest():
+    query = request.args.get('name', '').strip()
+    if not query:
+        return jsonify([])
+
+    search_terms = query.split()
+
+    if len(search_terms) == 2:
+        first_name = search_terms[0]
+        last_name = search_terms[1]
+        guests = db.session.execute(
+            db.select(Guest).filter(
+                db.and_(
+                    Guest.first_name.ilike(f'%{first_name}%'),
+                    Guest.last_name.ilike(f'%{last_name}%')
+                )
+            )
+        ).scalars().all()
+    else:
+        guests = db.session.execute(
+            db.select(Guest).filter(
+                db.or_(
+                    Guest.first_name.ilike(f'%{query}%'),
+                    Guest.last_name.ilike(f'%{query}%')
+                )
+            )
+        ).scalars().all()
+
+    return jsonify([serialize_guest(g) for g in guests])
+
+@app.route('/api/party-members', methods=['GET'])
+def get_party_members():
+    party_id = request.args.get('party_id', '')
+    if not party_id:
+        return jsonify([])
+
+    guests = db.session.execute(
+        db.select(Guest).filter_by(party_id=party_id)
+    ).scalars().all()
+
+    return jsonify([serialize_guest(g) for g in guests])
+
 @app.route('/api/export-guests', methods=['GET'])
 @jwt_required()
 def export_guests():
@@ -143,8 +203,10 @@ def export_guests():
     output = io.StringIO()
     writer = csv.writer(output)
 
+    # Write header
     writer.writerow(['ID', 'First Name', 'Last Name', 'Party ID', 'Attending', 'Dietary Restrictions'])
 
+    # Write data
     for guest in guests:
         writer.writerow([
             guest.id,
@@ -164,27 +226,6 @@ def export_guests():
         as_attachment=True,
         download_name='guest_list.csv'
     )
-
-@app.route('/api/party/update-id', methods=['PUT'])
-@jwt_required()
-def update_party_id():
-    data = request.json
-    old_party_id = data.get('old_party_id')
-    new_party_id = data.get('new_party_id')
-
-    if not old_party_id or not new_party_id:
-        return jsonify(message="Missing old_party_id or new_party_id"), 400
-
-    guests_to_update = db.session.execute(
-        db.select(Guest).filter_by(party_id=old_party_id)
-    ).scalars().all()
-
-    for guest in guests_to_update:
-        guest.party_id = new_party_id
-
-    db.session.commit()
-    return jsonify(message=f"Updated party ID for {len(guests_to_update)} guests"), 200
-
 
 if __name__ == '__main__':
     app.run(debug=True)
