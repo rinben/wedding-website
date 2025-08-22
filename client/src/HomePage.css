@@ -45,7 +45,7 @@
   font-family: var(--font-cute);
   font-size: 4rem;
   color: var(--color-primary);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 5);
   z-index: 1;
 }
 
