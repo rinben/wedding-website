@@ -15,10 +15,7 @@ function Travel() {
       <div className="travel-grid">
         <div className="travel-card">
           <h3>Airbnb</h3>
-          <img
-            src="url(/public/airbnb-photo.jpg)"
-            alt="Airbnb in Crystal Beach"
-          />
+          <img src="url(/airbnb-photo.jpg)" alt="Airbnb in Crystal Beach" />
           <p>
             There are many homes and cottages within walking distance of the
             venue that can be rented through Airbnb. Feel free to explore some
