@@ -12,6 +12,7 @@ function Travel() {
         to make your trip as enjoyable as possible!
       </p>
 
+      <h2>Places to Stay</h2>
       <div className="travel-grid">
         <div className="travel-card">
           <h3>Airbnb</h3>
@@ -69,7 +70,7 @@ function Travel() {
       <h2>Things to Do</h2>
       <div className="travel-grid">
         <div className="travel-card">
-          <h3>Restaurants</h3>
+          <h3>Restaurants and Bars</h3>
           <img src="/restaurants-photo.webp" alt="Restaurants" />
           <p>
             Whether you are just looking for a drink or a great bite to eat,
