@@ -1,10 +1,10 @@
 # server/app.py
 from flask import Flask, jsonify, request, send_file
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager, jwt_required
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token
 
 import io
 import csv
@@ -15,8 +15,8 @@ CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///wedding.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config['JWT_SECRET_KEY'] = 'your-super-secret-key' # Change this to a real, secure secret key
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False # For simplicity, we won't expire tokens
+app.config['JWT_SECRET_KEY'] = 'your-super-secret-key'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -51,6 +51,7 @@ def home():
     return jsonify(message="Welcome to the wedding website backend!")
 
 @app.route('/api/register', methods=['POST'])
+@cross_origin()
 def register():
     data = request.get_json()
     username = data.get('username', None)
@@ -70,6 +71,7 @@ def register():
     return jsonify({"msg": "User created successfully"}), 201
 
 @app.route('/api/login', methods=['POST'])
+@cross_origin()
 def login():
     data = request.get_json()
     username = data.get('username', None)
@@ -78,7 +80,6 @@ def login():
     user = User.query.filter_by(username=username).first()
 
     if user and bcrypt.check_password_hash(user.password_hash, password):
-        from flask_jwt_extended import create_access_token
         access_token = create_access_token(identity=username)
         return jsonify(access_token=access_token)
     else:
@@ -92,6 +93,7 @@ def get_all_guests():
 
 @app.route('/api/guests/<int:guest_id>', methods=['PUT', 'PATCH'])
 @jwt_required()
+@cross_origin()
 def update_guest(guest_id):
     guest = db.session.get(Guest, guest_id)
     if not guest:
@@ -109,6 +111,7 @@ def update_guest(guest_id):
 
 @app.route('/api/guests/<int:guest_id>', methods=['DELETE'])
 @jwt_required()
+@cross_origin()
 def delete_guest(guest_id):
     guest = db.session.get(Guest, guest_id)
     if not guest:
@@ -120,6 +123,7 @@ def delete_guest(guest_id):
 
 @app.route('/api/guests', methods=['POST'])
 @jwt_required()
+@cross_origin()
 def add_guest():
     data = request.json
     new_guest = Guest(
@@ -135,6 +139,7 @@ def add_guest():
 
 @app.route('/api/guests/mass-delete', methods=['DELETE'])
 @jwt_required()
+@cross_origin()
 def mass_delete_guests():
     guest_ids = request.json.get('ids', [])
     if not guest_ids:
@@ -151,6 +156,7 @@ def mass_delete_guests():
     return jsonify(message=f"Deleted {len(guests_to_delete)} guests successfully"), 200
 
 @app.route('/api/search-guest', methods=['GET'])
+@cross_origin()
 def search_guest():
     query = request.args.get('name', '').strip()
     if not query:
@@ -182,6 +188,7 @@ def search_guest():
     return jsonify([serialize_guest(g) for g in guests])
 
 @app.route('/api/party-members', methods=['GET'])
+@cross_origin()
 def get_party_members():
     party_id = request.args.get('party_id', '')
     if not party_id:
@@ -195,6 +202,7 @@ def get_party_members():
 
 @app.route('/api/export-guests', methods=['GET'])
 @jwt_required()
+@cross_origin()
 def export_guests():
     guests = db.session.execute(db.select(Guest)).scalars().all()
     if not guests:
