@@ -50,8 +50,15 @@ function Travel() {
           <img src="/buffalo-hotel-photo.jpg" alt="Hotels in Buffalo, NY" />
           <p>
             For our guests traveling from out of town, there are several
-            convenient and beautiful hotels in the Buffalo area. Feel free to
-            explore some of the options here.
+            convenient and beautiful hotels in the Buffalo area.
+          </p>
+          <p>
+            <b>
+              Please Note: You will have to cross the Peace Bridge to get into
+              Canada. Please take bridge traffic into consideration when
+              traveling. You can find information about bridge traffic{" "}
+              <a href="https://mobile.peacebridge.com/#home">here</a>.
+            </b>
           </p>
           <Link to="/travel/buffalo" className="travel-button">
             Explore Options
