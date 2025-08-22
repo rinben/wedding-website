@@ -1,5 +1,7 @@
 // src/components/Travel.jsx
 import React from "react";
+import PeaceBridge from "./PeaceBridge";
+import "./PeaceBridge.css";
 import "./Travel.css";
 import { Link } from "react-router-dom";
 
@@ -94,6 +96,8 @@ function Travel() {
           </Link>
         </div>
       </div>
+
+      <PeaceBridge />
     </div>
   );
 }

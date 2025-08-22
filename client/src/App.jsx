@@ -9,6 +9,7 @@ import CanadaTravel from "./components/CanadaTravel";
 import BuffaloTravel from "./components/BuffaloTravel";
 import Restaurants from "./components/Restaurants";
 import Attractions from "./components/Attractions";
+import PeaceBridge from "./components/PeaceBridge";
 import Photos from "./components/Photos";
 import Registry from "./components/Registry";
 import AdminDashboard from "./components/AdminDashboard";

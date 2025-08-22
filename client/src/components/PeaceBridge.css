@@ -1,0 +1,55 @@
+/* src/components/PeaceBridge.css */
+.peace-bridge-container {
+  padding: 2rem;
+  font-family: var(--font-default);
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.peace-bridge-container h2 {
+  font-size: 3rem;
+  color: var(--color-secondary);
+  margin-bottom: 1rem;
+}
+
+.border-info-card {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.border-info-card h3 {
+  color: var(--color-primary);
+  font-family: var(--font-cute);
+  margin-bottom: 1rem;
+}
+
+.border-info-card ul {
+  list-style-type: disc;
+  padding-left: 2rem;
+}
+
+.note {
+  font-style: italic;
+  color: #666;
+  margin-top: 1rem;
+}
+
+.info-button {
+  display: inline-block;
+  background-color: var(--color-secondary);
+  color: white;
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.info-button:hover {
+  background-color: #b3777d;
+}
