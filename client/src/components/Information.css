@@ -1,86 +1,26 @@
-/* src/components/About.css */
-.about-us-container {
-  padding: 4rem 2rem;
+/* src/components/Information.css */
+.information-section {
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-.about-us-container h2 {
-  text-align: center;
-  margin-bottom: 3rem;
+.information-section h2 {
+  font-family: var(--font-cute);
   font-size: 3rem;
   color: var(--color-secondary);
+  margin-bottom: 2rem;
 }
 
-.about-section-ben,
-.about-section-sara {
-  display: flex;
-  align-items: center;
-  gap: 3rem;
-  margin-bottom: 4rem;
-  padding: 2rem;
-  border-radius: 8px;
-  opacity: 0;
-  transition: all 0.8s ease-out;
+.info-card {
+  margin-bottom: 1rem;
 }
 
-.about-section-ben {
-  transform: translateX(100px);
-}
-
-.about-section-ben.is-visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.about-section-sara {
-  transform: translateX(-100px);
-}
-
-.about-section-sara.is-visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.about-text {
-  flex: 1;
-  font-family: var(--font-default);
-  color: var(--color-text);
-  line-height: 1.8;
-}
-
-.about-photo {
-  flex: 1;
-  text-align: center;
-}
-
-.about-photo img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-}
-
-.about-paragraph {
-  margin-top: 1.5rem;
-}
-
-.about-signature {
-  font-style: italic;
-  text-align: right;
-  margin-top: 1rem;
-}
-
-@media (max-width: 768px) {
-  .about-section-ben,
-  .about-section-sara {
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .about-section-ben .about-photo {
-    order: -1;
-  }
-
-  .about-section-sara .about-photo {
-    order: -1;
-  }
+.info-card h3 {
+  font-family: var(--font-cute);
+  color: var(--color-primary);
+  font-size: 1.5rem;
 }
