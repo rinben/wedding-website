@@ -42,7 +42,12 @@ function NavBar() {
             </div>
           </li>
           <li>
-            <Link to="/#about-us" onClick={() => setIsOpen(false)}>
+            <Link to="/#information" onClick={() => setIsOpen(false)}>
+              Information
+            </Link>
+          </li>
+          <li>
+            <Link to="/about-us" onClick={() => setIsOpen(false)}>
               About Us
             </Link>
           </li>

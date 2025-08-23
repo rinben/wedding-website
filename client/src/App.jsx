@@ -1,6 +1,9 @@
 import React, { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import NavBar from "./components/NavBar";
+import Information from "./components/Information";
+import Itinerary from "./components/Itinerary";
+import AboutUsPage from "./components/AboutUsPage";
 import About from "./components/About";
 import Timeline from "./components/Timeline";
 import Rsvp from "./components/Rsvp";
@@ -34,18 +37,18 @@ function App() {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.hash === "#about-us") {
-      const aboutSection = document.getElementById("about-us");
-      if (aboutSection) {
-        aboutSection.scrollIntoView({ behavior: "smooth" });
+    if (location.hash === "#information") {
+      const informationSection = document.getElementById("information");
+      if (informationSection) {
+        informationSection.scrollIntoView({ behavior: "smooth" });
       }
     }
   }, [location]);
 
-  const handleScrollToAbout = () => {
-    const aboutSection = document.getElementById("about-us");
-    if (aboutSection) {
-      aboutSection.scrollIntoView({ behavior: "smooth" });
+  const handleScrollToInformation = () => {
+    const informationSection = document.getElementById("information");
+    if (informationSection) {
+      informationSection.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -63,13 +66,16 @@ function App() {
                 style={{ backgroundImage: "url(/benandsara_frontpage.jpg)" }}
               >
                 <h1 className="hero-title">Ben & Sara's Wedding!</h1>
-                <a onClick={handleScrollToAbout} className="scroll-down-arrow">
+                <a
+                  onClick={handleScrollToInformation}
+                  className="scroll-down-arrow"
+                >
                   &#x25BC;
                 </a>
               </section>
               <section className="content-section">
-                <About />
-                <Timeline />
+                <Information />
+                <Itinerary />
               </section>
             </>
           }
@@ -79,6 +85,14 @@ function App() {
           element={
             <div className="other-pages-container">
               <Rsvp />
+            </div>
+          }
+        />
+        <Route
+          path="/about-us"
+          element={
+            <div className="other-pages-container">
+              <AboutUsPage />
             </div>
           }
         />
