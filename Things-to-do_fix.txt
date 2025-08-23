@@ -1,4 +1,6 @@
-1) Fetch data for admin page
-2) What you need to get to Canada
-    a) If you plan on bringing a pet do this also
-3) Front Image
+1) What you need to get into Canada across the peace bridge.
+    a) If you plan on bringing a pet ensure you have all the appropriate paperwork.
+2) Front Image is a collage and when the screen is smaller it clips some of the images in the collage off. I would like it to show all the images.
+3) Move about us page to its own separate route.
+
+4) Add a Information section to homepage about wedding venue location and time, Dress attire, and itinarary.
