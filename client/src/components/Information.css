@@ -15,12 +15,34 @@
   margin-bottom: 2rem;
 }
 
+.info-card-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
 .info-card {
-  margin-bottom: 1rem;
+  background-color: var(--color-background);
+  padding: 1.5rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-basis: 30%;
 }
 
 .info-card h3 {
   font-family: var(--font-cute);
-  color: var(--color-primary);
+  color: var(--color-secondary);
   font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .info-card-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .info-card {
+    flex-basis: 100%;
+  }
 }
