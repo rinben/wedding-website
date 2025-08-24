@@ -14,7 +14,7 @@ function Information() {
         </div>
         <div className="info-card">
           <h3>Date</h3>
-          <p>September 12, 2026</p>
+          <p>Saturday, September 12, 2026</p>
         </div>
         <div className="info-card">
           <h3>Attire</h3>
