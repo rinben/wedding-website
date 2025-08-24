@@ -18,12 +18,12 @@
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
-  text-align: left;
+  text-align: center;
   margin-bottom: 2rem;
 }
 
 .border-info-card h3 {
-  color: var(--color-primary);
+  color: var(--color-secondary);
   font-family: var(--font-cute);
   margin-bottom: 1rem;
 }
@@ -48,6 +48,7 @@
   border-radius: 4px;
   font-weight: bold;
   transition: background-color 0.3s ease;
+  margin: 1rem;
 }
 
 .info-button:hover {

@@ -12,15 +12,22 @@ function PeaceBridge() {
 
       <div className="border-info-card">
         <h3>Required Documents</h3>
-        <ul>
-          <li>Passport</li>
-          <li>Enhanced Driver's License (EDL)</li>
-          <li>NEXUS Card</li>
-          <li>Free and Secure Trade (FAST) Card</li>
-        </ul>
+        <p>
+          There are many official documents that are required to cross the
+          US-Canada border. To ensure that you have all the required documents
+          please review this page.
+        </p>
+        <a
+          href="https://www.ezbordercrossing.com/the-inspection-experience/documentation-needed-to-cross-border/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="info-button"
+        >
+          Required Documentation
+        </a>
         <p className="note">
           Note: A standard birth certificate and government-issued ID are no
-          longer valid for land travel.
+          longer valid for land travel if you are an adult.
         </p>
       </div>
 
@@ -29,16 +36,22 @@ function PeaceBridge() {
         <p>
           If you plan on bringing a pet with you, you must have all the
           appropriate paperwork. This includes a valid rabies vaccination
-          certificate signed by a licensed veterinarian.{" "}
+          certificate signed by a licensed veterinarian. For more information
+          please review this page.{" "}
         </p>
+        <a
+          href="https://www.ezbordercrossing.com/the-inspection-experience/travelling-with-pets/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="info-button"
+        >
+          Traveling with Pets Information
+        </a>
       </div>
 
       <div className="border-info-card">
         <h3>For More Information</h3>
-        <p>
-          For the most up-to-date information, please visit the official Peace
-          Bridge website.
-        </p>
+        <p>For more information here are a few more websites.</p>
         <a
           href="https://www.peacebridge.com/"
           target="_blank"
@@ -46,6 +59,22 @@ function PeaceBridge() {
           className="info-button"
         >
           Peace Bridge Official Website
+        </a>
+        <a
+          href="https://www.cbsa-asfc.gc.ca/travel-voyage/checklist-aidememoire-eng.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="info-button"
+        >
+          Canadian Border Checklist
+        </a>
+        <a
+          href="https://www.cbp.gov/travel/us-citizens/know-before-you-go/know-you-go-traveling-abroad"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="info-button"
+        >
+          United States Returning Citizens Information
         </a>
       </div>
     </div>
