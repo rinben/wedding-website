@@ -44,8 +44,10 @@
 .hero-title {
   font-family: var(--font-cute);
   font-size: 4rem;
-  color: var(--color-primary);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 5);
+  color: var(--color-secondary);
+  text-shadow: 2px 2px 4px rgba(255, 255, 255, 5);
+  position: relative;
+  top: -150px;
   z-index: 1;
 }
 
@@ -60,7 +62,7 @@
 
 /* Basic styling for Information and Itinerary */
 .content-section section {
-  background-color: rgba(192, 207, 224, 0.8);
+  background-color: rgba(192, 207, 224, 0);
   padding: 2rem;
   margin-bottom: 2rem;
   border-radius: 8px;

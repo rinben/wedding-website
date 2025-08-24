@@ -1,16 +1,16 @@
 /* client/src/components/AboutUsPage.css */
-.content-section {
+.about-section {
   padding: 4rem 2rem;
   background-color: var(--color-primary);
   min-height: 100vh;
   background-size: cover;
   background-position: top center;
-  background-image: url("/Point+Abino+Light+House.jpg");
+  background-image: url("/crystal-beach.jpg");
 }
 
 /* Basic styling for Information and Itinerary */
-.content-section section {
-  background-color: rgba(192, 207, 224, 0.8);
+.about-section section {
+  background-color: rgba(192, 207, 224, 0);
   padding: 2rem;
   margin-bottom: 2rem;
   border-radius: 8px;

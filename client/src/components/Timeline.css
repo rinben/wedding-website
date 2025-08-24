@@ -66,7 +66,7 @@
   flex-basis: 45%;
   padding: 1rem;
   text-align: left;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.6);
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -75,6 +75,9 @@
   padding: 1rem;
   font-family: var(--font-cute);
   color: var(--color-text);
+  background-color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 2rem;
+  border-radius: 8px;
   font-size: 1.5rem;
   flex-basis: 45%;
   position: relative;

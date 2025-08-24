@@ -6,10 +6,10 @@ import "./AboutUsPage.css";
 
 function AboutUsPage() {
   return (
-      <section className="content-section">
-        <About />
-        <Timeline />
-      </section>
+    <section className="about-section">
+      <About />
+      <Timeline />
+    </section>
   );
 }
 

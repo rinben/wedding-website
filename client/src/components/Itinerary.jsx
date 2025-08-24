@@ -21,18 +21,18 @@ function Itinerary() {
   return (
     <section className="itinerary-container">
       <h2>Wedding Day Itinerary</h2>
-      <div className="timeline">
+      <div className="itinerary-timeline">
         {/* Public Events */}
         <div
           ref={ref1}
-          className={`timeline-item ${inView1 ? "is-visible" : ""}`}
+          className={`itinerary-timeline-item ${inView1 ? "is-visible" : ""}`}
         >
-          <div className="timeline-dot"></div>
-          <div className="timeline-date">
+          <div className="itinerary-timeline-dot"></div>
+          <div className="itinerary-timeline-date">
             <h3>Friday Sept. 11th 2026</h3>
             <p>7:00 PM</p>
           </div>
-          <div className="timeline-content">
+          <div className="itinerary-content">
             <h4>Welcome Party</h4>
             <p>
               <b>Location:</b> Gather Tasting Room
@@ -41,14 +41,14 @@ function Itinerary() {
         </div>
         <div
           ref={ref2}
-          className={`timeline-item ${inView2 ? "is-visible" : ""}`}
+          className={`itinerary-timeline-item ${inView2 ? "is-visible" : ""}`}
         >
-          <div className="timeline-dot"></div>
-          <div className="timeline-date">
+          <div className="itinerary-timeline-dot"></div>
+          <div className="itinerary-timeline-date">
             <h3>Saturday Sept. 12th 2026</h3>
             <p>3:00 PM</p>
           </div>
-          <div className="timeline-content">
+          <div className="itinerary-content">
             <h4>Wedding Ceremony</h4>
             <p>
               <b>INVITED GUESTS ONLY</b>
@@ -60,14 +60,14 @@ function Itinerary() {
         </div>
         <div
           ref={ref3}
-          className={`timeline-item ${inView3 ? "is-visible" : ""}`}
+          className={`itinerary-timeline-item ${inView3 ? "is-visible" : ""}`}
         >
-          <div className="timeline-dot"></div>
-          <div className="timeline-date">
+          <div className="itinerary-timeline-dot"></div>
+          <div className="itinerary-timeline-date">
             <h3>Saturday Sept. 12th 2026</h3>
             <p>5:00 PM</p>
           </div>
-          <div className="timeline-content">
+          <div className="itinerary-content">
             <h4>Cocktail Hour</h4>
             <p>
               <b>Location:</b> Bay Beach Club
@@ -76,14 +76,14 @@ function Itinerary() {
         </div>
         <div
           ref={ref4}
-          className={`timeline-item ${inView4 ? "is-visible" : ""}`}
+          className={`itinerary-timeline-item ${inView4 ? "is-visible" : ""}`}
         >
-          <div className="timeline-dot"></div>
-          <div className="timeline-date">
+          <div className="itinerary-timeline-dot"></div>
+          <div className="itinerary-timeline-date">
             <h3>Saturday Sept. 12th 2026</h3>
             <p>6:00 PM</p>
           </div>
-          <div className="timeline-content">
+          <div className="itinerary-content">
             <h4>Dinner and Reception</h4>
             <p>
               <b>Location:</b> Bay Beach Club

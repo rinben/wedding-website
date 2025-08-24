@@ -9,7 +9,8 @@ function Information() {
       <div className="info-card-container">
         <div className="info-card">
           <h3>Venue</h3>
-          <p>Bay Beach Club, Ontario, Canada</p>
+          <p>Bay Beach Club</p>
+          <p>4325 Erie Rd, Ridgeway, ON L0S 1B0, Canada</p>
         </div>
         <div className="info-card">
           <h3>Date</h3>

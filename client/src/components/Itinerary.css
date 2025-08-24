@@ -1,23 +1,23 @@
 /* src/components/Itinerary.css */
-.timeline-container {
+.itinerary-container {
   padding: 4rem 2rem;
   text-align: center;
 }
 
-.timeline-container h2 {
+.itinerary-container h2 {
   text-align: center;
   margin-bottom: 3rem;
   font-size: 3rem;
   color: var(--color-secondary);
 }
 
-.timeline {
+.itinerary-timeline {
   position: relative;
   max-width: 900px;
   margin: 0 auto;
 }
 
-.timeline::before {
+.itinerary-timeline::before {
   content: "";
   position: absolute;
   top: 0;
@@ -28,7 +28,7 @@
   transform: translateX(-50%);
 }
 
-.timeline-item {
+.itinerary-timeline-item {
   position: relative;
   display: flex;
   justify-content: space-between;
@@ -37,15 +37,15 @@
   transition: all 0.8s ease-in-out;
 }
 
-.timeline-item.is-visible {
+.itinerary-timeline-item.is-visible {
   opacity: 1;
 }
 
-.timeline-item:nth-child(even) {
+.itinerary-timeline-item:nth-child(even) {
   flex-direction: row-reverse;
 }
 
-.timeline-dot {
+.itinerary-timeline-dot {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -58,23 +58,31 @@
   z-index: 1;
 }
 
-.timeline-dot.secret-dot {
+.itinerary-timeline-dot.secret-dot {
   cursor: pointer;
 }
 
-.timeline-content {
+.itinerary-content {
+  font-size: 1rem;
   flex-basis: 45%;
   padding: 1rem;
   text-align: left;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.6);
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.timeline-date {
+.itinerary-content h4 {
+  font-size: 1.5rem;
+}
+
+.itinerary-timeline-date {
   padding: 1rem;
   font-family: var(--font-cute);
   color: var(--color-text);
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   font-size: 1.5rem;
   flex-basis: 45%;
   position: relative;
@@ -91,32 +99,32 @@
 }
 
 @media (max-width: 768px) {
-  .timeline::before {
+  .itinerary-timeline::before {
     left: 2rem;
   }
 
-  .timeline-item {
+  .itinerary-timeline-item {
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
     padding-left: 3rem;
   }
 
-  .timeline-item:nth-child(even) {
+  .itinerary-timeline-item:nth-child(even) {
     flex-direction: column;
     text-align: left;
   }
 
-  .timeline-dot {
+  .itinerary-timeline-dot {
     left: 2rem;
     transform: translate(-50%, -50%);
   }
 
-  .timeline-date {
+  .itinerary-timeline-date {
     flex-basis: auto;
   }
 
-  .timeline-content {
+  .itinerary-content {
     margin-left: 0;
     margin-right: 0;
     text-align: left;

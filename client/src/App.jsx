@@ -91,7 +91,7 @@ function App() {
         <Route
           path="/about-us"
           element={
-            <div className="other-pages-container">
+            <div>
               <AboutUsPage />
             </div>
           }
