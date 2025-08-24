@@ -10,8 +10,5 @@
 
 Sara Items
 
-- get rid of light blue background bubbles on information and about us page - blocking cute picture of light house
-- change the white text bubbles to the light blue color
-- "Saturday, September 12, 2026"
-- Under "Crossing the peach bridge" section, change title color to pink
+-
 - Clean keyboard, it is oily and i dont like touching it
