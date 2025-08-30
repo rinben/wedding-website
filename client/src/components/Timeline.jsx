@@ -76,8 +76,9 @@ function Timeline() {
           <div className="timeline-content">
             <h4>First Date</h4>
             <p>
-              We had our first date at Chipotle. Before Ben could get up the
-              nerve to kiss Sara goodbye, Sara left with her friend Kaitlyn.
+              We had our first date at Chipotle. Crazy enough, Ben had never
+              been to Chipotle and had no idea what to order. After the date,
+              Sara left before Ben could work up the nerve to kiss her goodbye.
             </p>
           </div>
         </div>

@@ -11,7 +11,8 @@
 }
 
 .about-section-ben,
-.about-section-sara {
+.about-section-sara,
+.about-section-us {
   display: flex;
   align-items: center;
   gap: 3rem;
@@ -36,6 +37,15 @@
 }
 
 .about-section-sara.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.about-section-us {
+  transform: translateX(100px);
+}
+
+.about-section-us.is-visible {
   opacity: 1;
   transform: translateX(0);
 }
@@ -74,7 +84,8 @@
 
 @media (max-width: 768px) {
   .about-section-ben,
-  .about-section-sara {
+  .about-section-sara,
+  .about-section-us {
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
@@ -85,6 +96,10 @@
   }
 
   .about-section-sara .about-photo {
+    order: -1;
+  }
+
+  .about-section-us .about-photo {
     order: -1;
   }
 }
