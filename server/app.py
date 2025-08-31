@@ -14,8 +14,7 @@ import csv
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-# --- UPDATED DATABASE CONFIGURATION ---
-# Use the DATABASE_URL environment variable from Vercel.
+
 # Fall back to a default URI for local development.
 database_uri = os.environ.get('DATABASE_URL', 'sqlite:///wedding.db')
 
