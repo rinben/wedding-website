@@ -95,7 +95,7 @@ function Rsvp() {
       alert("Thank you for your RSVP!");
       setSelectedGuest(null);
       setPartyGuests([]);
-      setSearchQuery(""); // Clear the search bar after a successful submission
+      setSearchQuery("");
     } catch (error) {
       console.error("Error submitting RSVP:", error);
       alert("An error occurred while submitting your RSVP. Please try again.");
@@ -146,9 +146,7 @@ function Rsvp() {
                   type="radio"
                   name={`attending-${guest.id}`}
                   value="true"
-                  checked={
-                    guest.attending === true || guest.attending === "true"
-                  }
+                  checked={guest.attending === true}
                   onChange={() =>
                     handleRsvpChange(guest.id, "attending", "true")
                   }
@@ -160,9 +158,7 @@ function Rsvp() {
                   type="radio"
                   name={`attending-${guest.id}`}
                   value="false"
-                  checked={
-                    guest.attending === false || guest.attending === "false"
-                  }
+                  checked={guest.attending === false}
                   onChange={() =>
                     handleRsvpChange(guest.id, "attending", "false")
                   }
@@ -170,7 +166,7 @@ function Rsvp() {
                 No, with regret.
               </label>
             </div>
-            {(guest.attending === true || guest.attending === "true") && (
+            {guest.attending && (
               <div>
                 <label htmlFor={`dietary-${guest.id}`}>
                   Dietary Restrictions:
