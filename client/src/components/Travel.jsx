@@ -17,12 +17,12 @@ function Travel() {
       <h2>Places to Stay</h2>
       <div className="travel-grid">
         <div className="travel-card">
-          <h3>Airbnb</h3>
+          <h3>Airbnb/Vrbo</h3>
           <img src="/airbnb-photo.jpg" alt="Airbnb in Crystal Beach" />
           <p>
             There are many homes and cottages within walking distance of the
-            venue that can be rented through Airbnb. Feel free to explore some
-            of the options in the area.
+            venue that can be rented through Airbnb or Vrbo. Feel free to
+            explore some of the options in the area.
           </p>
           <a
             href="https://www.airbnb.com/s/Crystal-Beach--Ontario--Canada/homes?refinement_paths%5B%5D=%2Fhomes&place_id=ChIJxcy0ick904kRC97fGZ0kerU&acp_id=cc2bb686-69fe-493e-840c-e65905307cbc&date_picker_type=calendar&source=structured_search_input_header&search_type=filter_change&query=Crystal%20Beach%2C%20Ontario%2C%20Canada&flexible_trip_lengths%5B%5D=one_week&monthly_start_date=2025-09-01&monthly_length=3&monthly_end_date=2025-12-01&search_mode=regular_search&price_filter_input_type=2&channel=EXPLORE"
@@ -32,9 +32,17 @@ function Travel() {
           >
             Explore Airbnb
           </a>
+          <a
+            href="https://www.vrbo.com/search?destination=Crystal%20Beach%2C%20Fort%20Erie%2C%20Ontario%2C%20Canada&regionId=6222721&sort=RECOMMENDED&theme=&userIntent=&semdtl=&categorySearch="
+            target="_blank"
+            rel="noopener noreferrer"
+            className="travel-button"
+          >
+            Explore Vrbo
+          </a>
         </div>
         <div className="travel-card">
-          <h3>Hotels & Cottages (Canada)</h3>
+          <h3>Hotels (Canada)</h3>
           <img
             src="/canada-hotel-photo.jpeg"
             alt="Hotels in Crystal Beach, Canada"
