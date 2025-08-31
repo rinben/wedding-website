@@ -99,19 +99,24 @@ def get_all_guests():
 @jwt_required()
 @cross_origin()
 def update_guest(guest_id):
-    guest = db.session.get(Guest, guest_id)
-    if not guest:
-        return jsonify(message="Guest not found"), 404
+    try:
+        guest = db.session.get(Guest, guest_id)
+        if not guest:
+            return jsonify(message="Guest not found"), 404
 
-    data = request.json
-    guest.first_name = data.get('first_name', guest.first_name)
-    guest.last_name = data.get('last_name', guest.last_name)
-    guest.party_id = data.get('party_id', guest.party_id)
-    guest.attending = data.get('attending', guest.attending)
-    guest.dietary_restrictions = data.get('dietary_restrictions', guest.dietary_restrictions)
+        data = request.json
+        guest.first_name = data.get('first_name', guest.first_name)
+        guest.last_name = data.get('last_name', guest.last_name)
+        guest.party_id = data.get('party_id', guest.party_id)
+        guest.attending = data.get('attending', guest.attending)
+        guest.dietary_restrictions = data.get('dietary_restrictions', guest.dietary_restrictions)
 
-    db.session.commit()
-    return jsonify(serialize_guest(guest))
+        db.session.commit()
+        return jsonify(serialize_guest(guest))
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating guest {guest_id}: {e}")
+        return jsonify(message="An error occurred while updating the guest"), 500
 
 @app.route('/api/guests/<int:guest_id>', methods=['DELETE'])
 @jwt_required()
