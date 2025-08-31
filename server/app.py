@@ -109,6 +109,12 @@ def update_guest(guest_id):
         guest.last_name = data.get('last_name', guest.last_name)
         guest.party_id = data.get('party_id', guest.party_id)
         guest.attending = data.get('attending', guest.attending)
+        if attending_data is not None:
+        # Explicitly convert to boolean if it's a string, otherwise use the value directly
+        if isinstance(attending_data, str):
+            guest.attending = attending_data.lower() == 'true'
+        else:
+            guest.attending = bool(attending_data)
         guest.dietary_restrictions = data.get('dietary_restrictions', guest.dietary_restrictions)
 
         db.session.commit()
@@ -270,16 +276,16 @@ def public_rsvp_update(guest_id):
         return jsonify(message="Guest not found"), 404
 
     data = request.json
-    # Convert the string "true" or "false" to a boolean
     attending_data = data.get('attending')
-    if isinstance(attending_data, str):
-        guest.attending = attending_data.lower() == 'true'
-    else:
-        guest.attending = attending_data
+    if attending_data is not None:
+        # Explicitly convert to boolean if it's a string, otherwise use the value directly
+        if isinstance(attending_data, str):
+            guest.attending = attending_data.lower() == 'true'
+        else:
+            guest.attending = bool(attending_data)
 
     guest.dietary_restrictions = data.get('dietary_restrictions', guest.dietary_restrictions)
 
-    db.session.add(guest)
     db.session.commit()
     return jsonify(message=f"Updated RSVP for {guest.first_name} {guest.last_name}"), 200
 
