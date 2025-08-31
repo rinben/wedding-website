@@ -154,15 +154,12 @@ def mass_delete_guests():
     if not guest_ids:
         return jsonify(message="No guest IDs provided"), 400
 
-    guests_to_delete = db.session.execute(
-        db.select(Guest).filter(Guest.id.in_(guest_ids))
-    ).scalars().all()
-
-    for guest in guests_to_delete:
-        db.session.delete(guest)
+    db.session.execute(
+        db.delete(Guest).where(Guest.id.in_(guest_ids))
+    )
 
     db.session.commit()
-    return jsonify(message=f"Deleted {len(guests_to_delete)} guests successfully"), 200
+    return jsonify(message=f"Deleted {len(guest_ids)} guests successfully"), 200
 
 @app.route('/api/search-guest', methods=['GET'])
 @cross_origin()
