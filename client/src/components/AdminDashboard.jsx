@@ -30,7 +30,7 @@ function AdminDashboard() {
 
   const fetchGuests = async () => {
     try {
-      const response = await fetch("http://api.ben-and-sara.com/api/guests", {
+      const response = await fetch("https://api.ben-and-sara.com/api/guests", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -60,7 +60,7 @@ function AdminDashboard() {
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://api.ben-and-sara.com/api/guests", {
+      const response = await fetch("https://api.ben-and-sara.com/api/guests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -92,7 +92,7 @@ function AdminDashboard() {
 
     try {
       const response = await fetch(
-        `http://api.ben-and-sara.com/api/guests/${guestId}`,
+        `https://api.ben-and-sara.com/api/guests/${guestId}`,
         {
           method: "DELETE",
           headers: {
@@ -122,7 +122,7 @@ function AdminDashboard() {
 
     try {
       const response = await fetch(
-        "http://api.ben-and-sara.com/api/guests/mass-delete",
+        "https://api.ben-and-sara.com/api/guests/mass-delete",
         {
           method: "DELETE",
           headers: {
@@ -148,7 +148,7 @@ function AdminDashboard() {
   const handleExport = async () => {
     try {
       const response = await fetch(
-        "http://api.ben-and-sara.com/api/export-guests",
+        "https://api.ben-and-sara.com/api/export-guests",
         {
           method: "GET",
           headers: {
@@ -197,7 +197,7 @@ function AdminDashboard() {
         );
 
         if (shouldUpdateParty) {
-          await fetch("http://api.ben-and-sara.com/api/party/update-id", {
+          await fetch("https://api.ben-and-sara.com/api/party/update-id", {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -212,7 +212,7 @@ function AdminDashboard() {
       }
 
       const response = await fetch(
-        `http://api.ben-and-sara.com/api/guests/${editingGuest.id}`,
+        `https://api.ben-and-sara.com/api/guests/${editingGuest.id}`,
         {
           method: "PUT",
           headers: {
