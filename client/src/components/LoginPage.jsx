@@ -1,21 +1,23 @@
+// client/src/components/LoginPage.jsx
 import React, { useState } from "react";
-import { API_BASE_URL } from "../config";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // Import the useAuth hook
+import { useAuth } from "../context/AuthContext";
+import { API_BASE_URL } from "../config"; // Import the new config file
 
 function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth(); // Get the login function from the context
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      const response = await fetch("${API_BASE_URL}/api/login", {
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
+        // CORRECT URL SYNTAX
         method: "POST",
         headers: {
           "Content-Type": "application/json",
