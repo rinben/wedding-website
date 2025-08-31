@@ -271,6 +271,7 @@ def public_rsvp_update(guest_id):
     guest.attending = data.get('attending', guest.attending)
     guest.dietary_restrictions = data.get('dietary_restrictions', guest.dietary_restrictions)
 
+    db.session.add(guest)
     db.session.commit()
     return jsonify(message=f"Updated RSVP for {guest.first_name} {guest.last_name}"), 200
 
