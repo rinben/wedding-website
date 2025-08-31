@@ -32,6 +32,7 @@
   position: relative;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 3rem;
   opacity: 0;
   transition: all 0.8s ease-in-out;
@@ -39,10 +40,6 @@
 
 .itinerary-timeline-item.is-visible {
   opacity: 1;
-}
-
-.itinerary-timeline-item:nth-child(even) {
-  flex-direction: row-reverse;
 }
 
 .itinerary-timeline-dot {
@@ -55,11 +52,7 @@
   border-radius: 50%;
   border: 2px solid var(--color-background);
   transform: translate(-50%, -50%);
-  z-index: 1;
-}
-
-.itinerary-timeline-dot.secret-dot {
-  cursor: pointer;
+  z-index: 2; /* Increased z-index to sit on top of cards */
 }
 
 .itinerary-content {
@@ -70,6 +63,7 @@
   background-color: rgba(255, 255, 255, 0.6);
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 0 2rem; /* Add margin to prevent overlapping */
 }
 
 .itinerary-content h4 {
@@ -86,21 +80,16 @@
   font-size: 1.5rem;
   flex-basis: 45%;
   position: relative;
-}
-
-.secret-content {
-  display: none;
-  opacity: 0;
-}
-
-.secret-content.is-shown {
-  display: block;
-  opacity: 1;
+  margin: 0 2rem; /* Add margin to prevent overlapping */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 @media (max-width: 768px) {
   .itinerary-timeline::before {
-    left: 2rem;
+    left: -2rem;
   }
 
   .itinerary-timeline-item {
@@ -108,25 +97,41 @@
     align-items: flex-start;
     text-align: left;
     padding-left: 3rem;
-  }
-
-  .itinerary-timeline-item:nth-child(even) {
-    flex-direction: column;
-    text-align: left;
+    margin-bottom: 2rem;
   }
 
   .itinerary-timeline-dot {
-    left: 2rem;
+    left: -2rem;
     transform: translate(-50%, -50%);
   }
 
-  .itinerary-timeline-date {
-    flex-basis: auto;
-  }
-
+  .itinerary-timeline-date,
   .itinerary-content {
+    flex-basis: auto;
+    width: 100%;
     margin-left: 0;
     margin-right: 0;
-    text-align: left;
+  }
+
+  .itinerary-timeline-item .itinerary-timeline-date,
+  .itinerary-timeline-item .itinerary-content {
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+
+  .itinerary-timeline-item {
+    padding-left: 0;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .itinerary-timeline::before {
+    display: block;
+  }
+
+  .itinerary-timeline-dot {
+    display: block;
   }
 }
