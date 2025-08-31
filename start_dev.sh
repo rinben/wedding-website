@@ -14,7 +14,7 @@ fi
 tmux new-session -d -s wedding
 
 # Start the Flask backend in the first pane
-tmux send-keys -t wedding:0.0 "cd server && source venv/bin/activate.fish && flask run" C-m
+tmux send-keys -t wedding:0.0 "cd server && source venv/bin/activate && flask run" C-m
 
 # Split the window to create a second pane for the frontend
 tmux split-window -h -t wedding:0

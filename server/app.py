@@ -1,4 +1,5 @@
 # server/app.py
+import os
 from werkzeug.wrappers import Request, Response
 from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS, cross_origin
@@ -273,10 +274,5 @@ def public_rsvp_update(guest_id):
     db.session.commit()
     return jsonify(message=f"Updated RSVP for {guest.first_name} {guest.last_name}"), 200
 
-@Request.application
-def application(request):
-    return app(request)
-
 if __name__ == '__main__':
-    from werkzeug.serving import run_simple
-    run_simple('localhost', 5000, application)
+    app.run(debug=True)
