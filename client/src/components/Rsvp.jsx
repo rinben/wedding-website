@@ -61,7 +61,7 @@ function Rsvp() {
   const handleRsvpChange = (guestId, field, value) => {
     setPartyGuests((prevGuests) =>
       prevGuests.map((guest) =>
-        guest.id === guestId ? { ...guest, [field]: value } : guest,
+        guest.id === guestId ? { ...guest, [field]: value === "true" } : guest,
       ),
     );
   };
