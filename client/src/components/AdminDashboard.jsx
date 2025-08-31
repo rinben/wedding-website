@@ -30,7 +30,7 @@ function AdminDashboard() {
 
   const fetchGuests = async () => {
     try {
-      const response = await fetch("https://api.ben-and-sara.com/api/guests", {
+      const response = await fetch("${API_BASE_URL}/api/guests", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -60,7 +60,7 @@ function AdminDashboard() {
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://api.ben-and-sara.com/api/guests", {
+      const response = await fetch("${API_BASE_URL}/api/guests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,15 +91,12 @@ function AdminDashboard() {
     if (!window.confirm("Are you sure you want to delete this guest?")) return;
 
     try {
-      const response = await fetch(
-        `https://api.ben-and-sara.com/api/guests/${guestId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await fetch(`${API_BASE_URL}/api/guests/${guestId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -121,17 +118,14 @@ function AdminDashboard() {
       return;
 
     try {
-      const response = await fetch(
-        "https://api.ben-and-sara.com/api/guests/mass-delete",
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ ids: selectedGuests }),
+      const response = await fetch("${API_BASE_URL}/api/guests/mass-delete", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+        body: JSON.stringify({ ids: selectedGuests }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -147,15 +141,12 @@ function AdminDashboard() {
 
   const handleExport = async () => {
     try {
-      const response = await fetch(
-        "https://api.ben-and-sara.com/api/export-guests",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await fetch("${API_BASE_URL}/api/export-guests", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -197,7 +188,7 @@ function AdminDashboard() {
         );
 
         if (shouldUpdateParty) {
-          await fetch("https://api.ben-and-sara.com/api/party/update-id", {
+          await fetch("${API_BASE_URL}/api/party/update-id", {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -212,7 +203,7 @@ function AdminDashboard() {
       }
 
       const response = await fetch(
-        `https://api.ben-and-sara.com/api/guests/${editingGuest.id}`,
+        `${API_BASE_URL}/api/guests/${editingGuest.id}`,
         {
           method: "PUT",
           headers: {

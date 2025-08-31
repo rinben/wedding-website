@@ -17,6 +17,7 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Fall back to a default URI for local development.
 database_uri = os.environ.get('DATABASE_URL', 'sqlite:///wedding.db')
+print(f"Using database URI: {database_uri}")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

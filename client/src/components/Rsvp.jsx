@@ -1,5 +1,6 @@
 // src/components/Rsvp.jsx
 import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from "../config";
 import "./Rsvp.css";
 
 function Rsvp() {
@@ -20,7 +21,7 @@ function Rsvp() {
       setLoading(true);
       try {
         const response = await fetch(
-          `https://api.ben-and-sara.com/api/search-guest?name=${searchQuery}`,
+          `${API_BASE_URL}/api/search-guest?name=${searchQuery}`,
         );
         if (!response.ok) {
           throw new Error("Failed to fetch guest list.");
@@ -44,7 +45,7 @@ function Rsvp() {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://api.ben-and-sara.com/api/party-members?party_id=${guest.party_id}`,
+        `${API_BASE_URL}/api/party-members?party_id=${guest.party_id}`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch party members.");
@@ -71,7 +72,7 @@ function Rsvp() {
 
     try {
       const updatePromises = partyGuests.map((guest) =>
-        fetch(`https://api.ben-and-sara.com/api/public-rsvp/${guest.id}`, {
+        fetch(`${API_BASE_URL}/api/public-rsvp/${guest.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
