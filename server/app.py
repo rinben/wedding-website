@@ -15,8 +15,8 @@ CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///wedding.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config['JWT_SECRET_KEY'] = 'your-super-secret-key'
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
+app.config['JWT_SECRET_KEY'] = 'your-super-secret-key' # Change this to a real, secure secret key
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False # For simplicity, we won't expire tokens
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -47,6 +47,7 @@ def serialize_guest(guest):
     }
 
 @app.route('/')
+@cross_origin()
 def home():
     return jsonify(message="Welcome to the wedding website backend!")
 
@@ -87,6 +88,7 @@ def login():
 
 @app.route('/api/guests', methods=['GET'])
 @jwt_required()
+@cross_origin()
 def get_all_guests():
     guests = db.session.execute(db.select(Guest)).scalars().all()
     return jsonify([serialize_guest(g) for g in guests])
@@ -200,6 +202,27 @@ def get_party_members():
 
     return jsonify([serialize_guest(g) for g in guests])
 
+@app.route('/api/party/update-id', methods=['PUT'])
+@jwt_required()
+@cross_origin()
+def update_party_id():
+    data = request.json
+    old_party_id = data.get('old_party_id')
+    new_party_id = data.get('new_party_id')
+
+    if not old_party_id or not new_party_id:
+        return jsonify(message="Missing old_party_id or new_party_id"), 400
+
+    guests_to_update = db.session.execute(
+        db.select(Guest).filter_by(party_id=old_party_id)
+    ).scalars().all()
+
+    for guest in guests_to_update:
+        guest.party_id = new_party_id
+
+    db.session.commit()
+    return jsonify(message=f"Updated party ID for {len(guests_to_update)} guests"), 200
+
 @app.route('/api/export-guests', methods=['GET'])
 @jwt_required()
 @cross_origin()
@@ -234,6 +257,20 @@ def export_guests():
         as_attachment=True,
         download_name='guest_list.csv'
     )
+
+@app.route('/api/public-rsvp/<int:guest_id>', methods=['PUT'])
+@cross_origin()
+def public_rsvp_update(guest_id):
+    guest = db.session.get(Guest, guest_id)
+    if not guest:
+        return jsonify(message="Guest not found"), 404
+
+    data = request.json
+    guest.attending = data.get('attending', guest.attending)
+    guest.dietary_restrictions = data.get('dietary_restrictions', guest.dietary_restrictions)
+
+    db.session.commit()
+    return jsonify(message=f"Updated RSVP for {guest.first_name} {guest.last_name}"), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

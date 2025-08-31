@@ -78,7 +78,7 @@ function Timeline() {
             <p>
               We had our first date at Chipotle. Crazy enough, Ben had never
               been to Chipotle and had no idea what to order. After the date,
-              Sara left before Ben could work up the nerve to kiss her goodbye.
+              Ben struggled to work up the nerve to kiss Sara goodbye.
             </p>
           </div>
         </div>
@@ -203,7 +203,7 @@ function Timeline() {
           <div className="timeline-content">
             <h4>Sara Moved In</h4>
             <p>
-              After Sara graduated, She fully moved into the apartment with Ben.
+              After Sara graduated, she fully moved into the apartment with Ben.
               For the first time, we were living together without anyone else.
             </p>
           </div>
@@ -252,7 +252,7 @@ function Timeline() {
               We had a week just the two of us, then we spent the weekend with
               friends celebrating Eric and Bill.
             </p>
-            <p>P.S. Ben buys the first engagement ring!</p>
+            <p>P.S. Ben buys the engagement ring!</p>
           </div>
         </div>
         {/* Public Event: December 2023 */}

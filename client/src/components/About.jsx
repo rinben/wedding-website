@@ -57,14 +57,14 @@ function About() {
         <div className="about-text">
           <h3>About Sara</h3>
           <p className="about-paragraph">
-            Sara grew up in Williamsville, NY. She has a love for Baton
-            Twirling, the beach,collecting rocks, and playing music. She spends
-            her days at work as an Athletic Trainer and her time off at Crystal
-            Beach where she is the third generation to own property near the
-            beach. When she is not able to go to Crystal Beach, she spends her
-            days creating crafts, painting her nails, and listening to music.
-            Sara attended University at Buffalo where she twirled baton in
-            marching band and played tenor saxophone in pep band. Sara is the
+            Sara grew up in Williamsville, NY. She has a love for the beach,
+            creating art, playing with our dog, and listening to music. She
+            spends her days at work as an Athletic Trainer and her time off at
+            Crystal Beach where she is the third generation to own property near
+            the beach. When she is not able to go to Crystal Beach, she spends
+            her days exploring nature and planning our next get together with
+            friends. Sara attended University at Buffalo where she twirled baton
+            in marching band and played tenor saxophone in pep band. Sara is the
             perfect compliment to me. I am known to be quite a lot to handle and
             Sara has an abundance of patience. When Sara and I first started
             dating I told her that everyday I find a new reason to love her more
