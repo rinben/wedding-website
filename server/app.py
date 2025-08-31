@@ -81,17 +81,22 @@ def register():
 @app.route('/api/login', methods=['POST'])
 @cross_origin()
 def login():
-    data = request.get_json()
-    username = data.get('username', None)
-    password = data.get('password', None)
+    try:
+        data = request.get_json()
+        username = data.get('username', None)
+        password = data.get('password', None)
 
-    user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(username=username).first()
 
-    if user and bcrypt.check_password_hash(user.password_hash, password):
-        access_token = create_access_token(identity=username)
-        return jsonify(access_token=access_token)
-    else:
-        return jsonify({"msg": "Invalid username or password"}), 401
+        if user and bcrypt.check_password_hash(user.password_hash, password):
+            access_token = create_access_token(identity=username)
+            return jsonify(access_token=access_token)
+        else:
+            return jsonify({"msg": "Invalid username or password"}), 401
+    except Exception as e:
+        # Print the detailed error message to the console for debugging
+        print(f"An error occurred during login: {e}")
+        return jsonify({"msg": "An internal server error occurred"}), 500
 
 @app.route('/api/guests', methods=['GET'])
 @jwt_required()
