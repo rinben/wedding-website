@@ -95,6 +95,7 @@ function Rsvp() {
       alert("Thank you for your RSVP!");
       setSelectedGuest(null);
       setPartyGuests([]);
+      setSearchQuery(""); // Clear the search bar after a successful submission
     } catch (error) {
       console.error("Error submitting RSVP:", error);
       alert("An error occurred while submitting your RSVP. Please try again.");
@@ -148,9 +149,11 @@ function Rsvp() {
                   checked={
                     guest.attending === true || guest.attending === "true"
                   }
-                  onChange={() => handleRsvpChange(guest.id, "attending", true)}
+                  onChange={() =>
+                    handleRsvpChange(guest.id, "attending", "true")
+                  }
                 />
-                Yes!
+                Yes, with pleasure!
               </label>
               <label>
                 <input
@@ -161,10 +164,10 @@ function Rsvp() {
                     guest.attending === false || guest.attending === "false"
                   }
                   onChange={() =>
-                    handleRsvpChange(guest.id, "attending", false)
+                    handleRsvpChange(guest.id, "attending", "false")
                   }
                 />
-                No.
+                No, with regret.
               </label>
             </div>
             {(guest.attending === true || guest.attending === "true") && (
