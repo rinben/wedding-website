@@ -20,7 +20,7 @@ function Rsvp() {
       setLoading(true);
       try {
         const response = await fetch(
-          `http://localhost:5000/api/search-guest?name=${searchQuery}`,
+          `http://api.ben-and-sara.com/api/search-guest?name=${searchQuery}`,
         );
         if (!response.ok) {
           throw new Error("Failed to fetch guest list.");
@@ -44,7 +44,7 @@ function Rsvp() {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:5000/api/party-members?party_id=${guest.party_id}`,
+        `http://api.ben-and-sara.com/api/party-members?party_id=${guest.party_id}`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch party members.");
@@ -72,7 +72,7 @@ function Rsvp() {
     try {
       for (const guest of partyGuests) {
         const response = await fetch(
-          `http://localhost:5000/api/public-rsvp/${guest.id}`,
+          `http://api.ben-and-sara.com/api/public-rsvp/${guest.id}`,
           {
             method: "PUT",
             headers: {

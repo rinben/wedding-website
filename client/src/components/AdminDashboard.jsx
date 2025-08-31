@@ -30,7 +30,7 @@ function AdminDashboard() {
 
   const fetchGuests = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/guests", {
+      const response = await fetch("http://api.ben-and-sara.com/api/guests", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -60,7 +60,7 @@ function AdminDashboard() {
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/api/guests", {
+      const response = await fetch("http://api.ben-and-sara.com/api/guests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -92,7 +92,7 @@ function AdminDashboard() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/guests/${guestId}`,
+        `http://api.ben-and-sara.com/api/guests/${guestId}`,
         {
           method: "DELETE",
           headers: {
@@ -122,7 +122,7 @@ function AdminDashboard() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/guests/mass-delete",
+        "http://api.ben-and-sara.com/api/guests/mass-delete",
         {
           method: "DELETE",
           headers: {
@@ -147,12 +147,15 @@ function AdminDashboard() {
 
   const handleExport = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/export-guests", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        "http://api.ben-and-sara.com/api/export-guests",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -194,7 +197,7 @@ function AdminDashboard() {
         );
 
         if (shouldUpdateParty) {
-          await fetch("http://localhost:5000/api/party/update-id", {
+          await fetch("http://api.ben-and-sara.com/api/party/update-id", {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -209,7 +212,7 @@ function AdminDashboard() {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/guests/${editingGuest.id}`,
+        `http://api.ben-and-sara.com/api/guests/${editingGuest.id}`,
         {
           method: "PUT",
           headers: {
