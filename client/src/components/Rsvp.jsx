@@ -70,25 +70,26 @@ function Rsvp() {
     e.preventDefault();
 
     try {
-      for (const guest of partyGuests) {
-        const response = await fetch(
-          `https://api.ben-and-sara.com/api/public-rsvp/${guest.id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              attending: guest.attending,
-              dietary_restrictions: guest.dietary_restrictions,
-            }),
+      const updatePromises = partyGuests.map((guest) =>
+        fetch(`https://api.ben-and-sara.com/api/public-rsvp/${guest.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify({
+            attending: guest.attending,
+            dietary_restrictions: guest.dietary_restrictions,
+          }),
+        }),
+      );
 
+      // Wait for all promises to resolve
+      const responses = await Promise.all(updatePromises);
+      for (const response of responses) {
         if (!response.ok) {
-          throw new Error(
-            `Failed to update guest: ${guest.first_name} ${guest.last_name}`,
-          );
+          // You'll need to handle which specific request failed
+          // For simplicity, we'll just throw a generic error for now
+          throw new Error("One or more RSVP updates failed.");
         }
       }
 

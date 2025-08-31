@@ -273,7 +273,13 @@ def public_rsvp_update(guest_id):
         return jsonify(message="Guest not found"), 404
 
     data = request.json
-    guest.attending = data.get('attending', guest.attending)
+    # Convert the string "true" or "false" to a boolean
+    attending_data = data.get('attending')
+    if isinstance(attending_data, str):
+        guest.attending = attending_data.lower() == 'true'
+    else:
+        guest.attending = attending_data
+
     guest.dietary_restrictions = data.get('dietary_restrictions', guest.dietary_restrictions)
 
     db.session.add(guest)
