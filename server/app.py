@@ -1,5 +1,5 @@
 # server/app.py
-import os
+import os # Make sure this is imported at the top
 from werkzeug.wrappers import Request, Response
 from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS, cross_origin
@@ -14,7 +14,12 @@ import csv
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///wedding.db'
+# --- UPDATED DATABASE CONFIGURATION ---
+# Use the DATABASE_URL environment variable from Vercel.
+# Fall back to a default URI for local development.
+database_uri = os.environ.get('DATABASE_URL', 'sqlite:///wedding.db')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['JWT_SECRET_KEY'] = 'your-super-secret-key' # Change this to a real, secure secret key
@@ -108,13 +113,15 @@ def update_guest(guest_id):
         guest.first_name = data.get('first_name', guest.first_name)
         guest.last_name = data.get('last_name', guest.last_name)
         guest.party_id = data.get('party_id', guest.party_id)
-        guest.attending = data.get('attending', guest.attending)
+
+        attending_data = data.get('attending')
         if attending_data is not None:
-        # Explicitly convert to boolean if it's a string, otherwise use the value directly
-        if isinstance(attending_data, str):
-            guest.attending = attending_data.lower() == 'true'
-        else:
-            guest.attending = bool(attending_data)
+            # All lines below must be indented correctly
+            if isinstance(attending_data, str):
+                guest.attending = attending_data.lower() == 'true'
+            else:
+                guest.attending = bool(attending_data)
+
         guest.dietary_restrictions = data.get('dietary_restrictions', guest.dietary_restrictions)
 
         db.session.commit()
@@ -123,7 +130,6 @@ def update_guest(guest_id):
         db.session.rollback()
         print(f"Error updating guest {guest_id}: {e}")
         return jsonify(message="An error occurred while updating the guest"), 500
-
 @app.route('/api/guests/<int:guest_id>', methods=['DELETE'])
 @jwt_required()
 @cross_origin()
