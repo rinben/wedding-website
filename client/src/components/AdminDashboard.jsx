@@ -1,5 +1,6 @@
 // src/components/AdminDashboard.jsx
 import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from "../config"; // Import the new config file
 import { useAuth } from "../context/AuthContext";
 import "./AdminDashboard.css";
 

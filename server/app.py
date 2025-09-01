@@ -1,40 +1,63 @@
 # server/app.py
-import os # Make sure this is imported at the top
+import os # Used to get environment variables and manage file paths
 from werkzeug.wrappers import Request, Response
 from flask import Flask, jsonify, request, send_file
-from flask_cors import CORS, cross_origin
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_bcrypt import Bcrypt
+from flask_cors import CORS, cross_origin # For handling Cross-Origin Resource Sharing
+from flask_sqlalchemy import SQLAlchemy # ORM for interacting with the database
+from flask_migrate import Migrate # For handling database schema migrations
+from flask_bcrypt import Bcrypt # For securely hashing passwords
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
+from datetime import timedelta # For setting token expiration time
 
 import io
 import csv
 
-app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+# --- APP CONFIGURATION ---
+# Initialize the Flask app. instance_relative_config=True makes paths relative to the instance folder.
+app = Flask(__name__, instance_relative_config=True)
 
+# Create the instance folder if it doesn't exist, which is needed for SQLite.
+try:
+    os.makedirs(app.instance_path)
+except OSError:
+    pass
 
-# Fall back to a default URI for local development.
-database_uri = os.environ.get('DATABASE_URL', 'sqlite:///wedding.db')
-print(f"Using database URI: {database_uri}")
+# Determine the environment (production or development) from an environment variable.
+app.config['FLASK_ENV'] = os.environ.get('FLASK_ENV', 'development')
+is_production = app.config['FLASK_ENV'] == 'production'
+
+# --- DATABASE CONFIGURATION ---
+# Set the base directory for local paths
+basedir = os.path.abspath(os.path.dirname(__file__))
+# Construct the full path to the local SQLite database file
+db_path = os.path.join(basedir, 'instance', 'wedding.db')
+# Get the database URI from the environment variable, or fall back to the local SQLite path.
+database_uri = os.environ.get('DATABASE_URL', f'sqlite:///{db_path}')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config['JWT_SECRET_KEY'] = 'your-super-secret-key' # Change this to a real, secure secret key
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False # For simplicity, we won't expire tokens
+# --- JWT Configuration
+# Get the JWT secret key from the environment, with a safe fallback for local dev.
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'a-safe-development-key')
+# Set token expiration: 60 minutes in production, no expiration in development.
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=60) if is_production else False
 
+# --- EXTENSION INITIALIZATION ---
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
+# --- DATABASE MODELS ---
+# Defines the User table for admin login
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
 
+# Defines the Guest table for RSVP data
 class Guest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(100), nullable=False)
@@ -43,6 +66,7 @@ class Guest(db.Model):
     attending = db.Column(db.Boolean, default=False)
     dietary_restrictions = db.Column(db.Text, default='')
 
+# Helper function to convert a Guest object to a dictionary
 def serialize_guest(guest):
     return {
         'id': guest.id,
@@ -53,14 +77,17 @@ def serialize_guest(guest):
         'dietary_restrictions': guest.dietary_restrictions,
     }
 
+# --- API ROUTES ---
 @app.route('/')
 @cross_origin()
 def home():
+    """Root route for the API, returns a welcome message."""
     return jsonify(message="Welcome to the wedding website backend!")
 
 @app.route('/api/register', methods=['POST'])
 @cross_origin()
 def register():
+    """Registers a new admin user. Only used for initial setup."""
     data = request.get_json()
     username = data.get('username', None)
     password = data.get('password', None)
@@ -81,34 +108,36 @@ def register():
 @app.route('/api/login', methods=['POST'])
 @cross_origin()
 def login():
-    try:
-        data = request.get_json()
-        username = data.get('username', None)
-        password = data.get('password', None)
+    """Authenticates a user and returns a JWT access token."""
+    data = request.get_json()
+    username = data.get('username', None)
+    password = data.get('password', None)
 
-        user = User.query.filter_by(username=username).first()
+    user = User.query.filter_by(username=username).first()
 
-        if user and bcrypt.check_password_hash(user.password_hash, password):
-            access_token = create_access_token(identity=username)
-            return jsonify(access_token=access_token)
-        else:
-            return jsonify({"msg": "Invalid username or password"}), 401
-    except Exception as e:
-        # Print the detailed error message to the console for debugging
-        print(f"An error occurred during login: {e}")
-        return jsonify({"msg": "An internal server error occurred"}), 500
+    if user and bcrypt.check_password_hash(user.password_hash, password):
+        access_token = create_access_token(identity=username)
+        return jsonify(access_token=access_token)
+    else:
+        return jsonify({"msg": "Invalid username or password"}), 401
 
 @app.route('/api/guests', methods=['GET'])
 @jwt_required()
 @cross_origin()
 def get_all_guests():
-    guests = db.session.execute(db.select(Guest)).scalars().all()
-    return jsonify([serialize_guest(g) for g in guests])
+    """Fetches all guest data. Requires JWT authentication."""
+    try:
+        guests = db.session.execute(db.select(Guest)).scalars().all()
+        return jsonify([serialize_guest(g) for g in guests])
+    except Exception as e:
+        print(f"An error occurred while fetching guests: {e}")
+        return jsonify({"msg": "An internal server error occurred"}), 500
 
 @app.route('/api/guests/<int:guest_id>', methods=['PUT', 'PATCH'])
 @jwt_required()
 @cross_origin()
 def update_guest(guest_id):
+    """Updates a single guest's information. Requires JWT authentication."""
     try:
         guest = db.session.get(Guest, guest_id)
         if not guest:
@@ -121,7 +150,6 @@ def update_guest(guest_id):
 
         attending_data = data.get('attending')
         if attending_data is not None:
-            # All lines below must be indented correctly
             if isinstance(attending_data, str):
                 guest.attending = attending_data.lower() == 'true'
             else:
@@ -135,10 +163,12 @@ def update_guest(guest_id):
         db.session.rollback()
         print(f"Error updating guest {guest_id}: {e}")
         return jsonify(message="An error occurred while updating the guest"), 500
+
 @app.route('/api/guests/<int:guest_id>', methods=['DELETE'])
 @jwt_required()
 @cross_origin()
 def delete_guest(guest_id):
+    """Deletes a guest by ID. Requires JWT authentication."""
     guest = db.session.get(Guest, guest_id)
     if not guest:
         return jsonify(message="Guest not found"), 404
@@ -151,6 +181,7 @@ def delete_guest(guest_id):
 @jwt_required()
 @cross_origin()
 def add_guest():
+    """Adds a new guest to the database. Requires JWT authentication."""
     data = request.json
     new_guest = Guest(
         first_name=data.get('first_name'),
@@ -167,20 +198,25 @@ def add_guest():
 @jwt_required()
 @cross_origin()
 def mass_delete_guests():
+    """Deletes multiple guests by a list of IDs. Requires JWT authentication."""
     guest_ids = request.json.get('ids', [])
     if not guest_ids:
         return jsonify(message="No guest IDs provided"), 400
 
-    db.session.execute(
-        db.delete(Guest).where(Guest.id.in_(guest_ids))
-    )
+    guests_to_delete = db.session.execute(
+        db.select(Guest).filter(Guest.id.in_(guest_ids))
+    ).scalars().all()
+
+    for guest in guests_to_delete:
+        db.session.delete(guest)
 
     db.session.commit()
-    return jsonify(message=f"Deleted {len(guest_ids)} guests successfully"), 200
+    return jsonify(message=f"Deleted {len(guests_to_delete)} guests successfully"), 200
 
 @app.route('/api/search-guest', methods=['GET'])
 @cross_origin()
 def search_guest():
+    """Searches for guests by name for the public RSVP form."""
     query = request.args.get('name', '').strip()
     if not query:
         return jsonify([])
@@ -213,6 +249,7 @@ def search_guest():
 @app.route('/api/party-members', methods=['GET'])
 @cross_origin()
 def get_party_members():
+    """Fetches all members of a party for the public RSVP form."""
     party_id = request.args.get('party_id', '')
     if not party_id:
         return jsonify([])
@@ -227,6 +264,7 @@ def get_party_members():
 @jwt_required()
 @cross_origin()
 def update_party_id():
+    """Updates the party ID for a group of guests. Requires JWT authentication."""
     data = request.json
     old_party_id = data.get('old_party_id')
     new_party_id = data.get('new_party_id')
@@ -248,6 +286,7 @@ def update_party_id():
 @jwt_required()
 @cross_origin()
 def export_guests():
+    """Exports the entire guest list to a CSV file. Requires JWT authentication."""
     guests = db.session.execute(db.select(Guest)).scalars().all()
     if not guests:
         return jsonify(message="No guests to export"), 404
@@ -282,6 +321,7 @@ def export_guests():
 @app.route('/api/public-rsvp/<int:guest_id>', methods=['PUT'])
 @cross_origin()
 def public_rsvp_update(guest_id):
+    """Publicly updates a guest's RSVP status. No authentication required."""
     guest = db.session.get(Guest, guest_id)
     if not guest:
         return jsonify(message="Guest not found"), 404
@@ -289,7 +329,6 @@ def public_rsvp_update(guest_id):
     data = request.json
     attending_data = data.get('attending')
     if attending_data is not None:
-        # Explicitly convert to boolean if it's a string, otherwise use the value directly
         if isinstance(attending_data, str):
             guest.attending = attending_data.lower() == 'true'
         else:
@@ -301,4 +340,4 @@ def public_rsvp_update(guest_id):
     return jsonify(message=f"Updated RSVP for {guest.first_name} {guest.last_name}"), 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=(not is_production))
