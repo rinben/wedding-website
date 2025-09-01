@@ -1,63 +1,51 @@
-# server/app.py
-import os # Used to get environment variables and manage file paths
+import os
 from werkzeug.wrappers import Request, Response
 from flask import Flask, jsonify, request, send_file
-from flask_cors import CORS, cross_origin # For handling Cross-Origin Resource Sharing
-from flask_sqlalchemy import SQLAlchemy # ORM for interacting with the database
-from flask_migrate import Migrate # For handling database schema migrations
-from flask_bcrypt import Bcrypt # For securely hashing passwords
+from flask_cors import CORS, cross_origin
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
-from datetime import timedelta # For setting token expiration time
+from datetime import timedelta
+from werkzeug.datastructures import FileStorage
 
 import io
 import csv
+import chardet # Import chardet for character encoding detection
 
 # --- APP CONFIGURATION ---
-# Initialize the Flask app. instance_relative_config=True makes paths relative to the instance folder.
 app = Flask(__name__, instance_relative_config=True)
 
-# Create the instance folder if it doesn't exist, which is needed for SQLite.
 try:
     os.makedirs(app.instance_path)
 except OSError:
     pass
 
-# Determine the environment (production or development) from an environment variable.
 app.config['FLASK_ENV'] = os.environ.get('FLASK_ENV', 'development')
 is_production = app.config['FLASK_ENV'] == 'production'
 
-# --- DATABASE CONFIGURATION ---
-# Set the base directory for local paths
 basedir = os.path.abspath(os.path.dirname(__file__))
-# Construct the full path to the local SQLite database file
 db_path = os.path.join(basedir, 'instance', 'wedding.db')
-# Get the database URI from the environment variable, or fall back to the local SQLite path.
+
 database_uri = os.environ.get('DATABASE_URL', f'sqlite:///{db_path}')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# --- JWT Configuration
-# Get the JWT secret key from the environment, with a safe fallback for local dev.
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'a-safe-development-key')
-# Set token expiration: 60 minutes in production, no expiration in development.
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=60) if is_production else False
 
-# --- EXTENSION INITIALIZATION ---
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
-# --- DATABASE MODELS ---
-# Defines the User table for admin login
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
 
-# Defines the Guest table for RSVP data
 class Guest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(100), nullable=False)
@@ -66,7 +54,6 @@ class Guest(db.Model):
     attending = db.Column(db.Boolean, default=False)
     dietary_restrictions = db.Column(db.Text, default='')
 
-# Helper function to convert a Guest object to a dictionary
 def serialize_guest(guest):
     return {
         'id': guest.id,
@@ -77,17 +64,14 @@ def serialize_guest(guest):
         'dietary_restrictions': guest.dietary_restrictions,
     }
 
-# --- API ROUTES ---
 @app.route('/')
 @cross_origin()
 def home():
-    """Root route for the API, returns a welcome message."""
     return jsonify(message="Welcome to the wedding website backend!")
 
 @app.route('/api/register', methods=['POST'])
 @cross_origin()
 def register():
-    """Registers a new admin user. Only used for initial setup."""
     data = request.get_json()
     username = data.get('username', None)
     password = data.get('password', None)
@@ -108,7 +92,6 @@ def register():
 @app.route('/api/login', methods=['POST'])
 @cross_origin()
 def login():
-    """Authenticates a user and returns a JWT access token."""
     data = request.get_json()
     username = data.get('username', None)
     password = data.get('password', None)
@@ -125,7 +108,6 @@ def login():
 @jwt_required()
 @cross_origin()
 def get_all_guests():
-    """Fetches all guest data. Requires JWT authentication."""
     try:
         guests = db.session.execute(db.select(Guest)).scalars().all()
         return jsonify([serialize_guest(g) for g in guests])
@@ -137,7 +119,6 @@ def get_all_guests():
 @jwt_required()
 @cross_origin()
 def update_guest(guest_id):
-    """Updates a single guest's information. Requires JWT authentication."""
     try:
         guest = db.session.get(Guest, guest_id)
         if not guest:
@@ -168,7 +149,6 @@ def update_guest(guest_id):
 @jwt_required()
 @cross_origin()
 def delete_guest(guest_id):
-    """Deletes a guest by ID. Requires JWT authentication."""
     guest = db.session.get(Guest, guest_id)
     if not guest:
         return jsonify(message="Guest not found"), 404
@@ -181,7 +161,6 @@ def delete_guest(guest_id):
 @jwt_required()
 @cross_origin()
 def add_guest():
-    """Adds a new guest to the database. Requires JWT authentication."""
     data = request.json
     new_guest = Guest(
         first_name=data.get('first_name'),
@@ -198,7 +177,6 @@ def add_guest():
 @jwt_required()
 @cross_origin()
 def mass_delete_guests():
-    """Deletes multiple guests by a list of IDs. Requires JWT authentication."""
     guest_ids = request.json.get('ids', [])
     if not guest_ids:
         return jsonify(message="No guest IDs provided"), 400
@@ -216,7 +194,6 @@ def mass_delete_guests():
 @app.route('/api/search-guest', methods=['GET'])
 @cross_origin()
 def search_guest():
-    """Searches for guests by name for the public RSVP form."""
     query = request.args.get('name', '').strip()
     if not query:
         return jsonify([])
@@ -249,7 +226,6 @@ def search_guest():
 @app.route('/api/party-members', methods=['GET'])
 @cross_origin()
 def get_party_members():
-    """Fetches all members of a party for the public RSVP form."""
     party_id = request.args.get('party_id', '')
     if not party_id:
         return jsonify([])
@@ -264,7 +240,6 @@ def get_party_members():
 @jwt_required()
 @cross_origin()
 def update_party_id():
-    """Updates the party ID for a group of guests. Requires JWT authentication."""
     data = request.json
     old_party_id = data.get('old_party_id')
     new_party_id = data.get('new_party_id')
@@ -286,7 +261,6 @@ def update_party_id():
 @jwt_required()
 @cross_origin()
 def export_guests():
-    """Exports the entire guest list to a CSV file. Requires JWT authentication."""
     guests = db.session.execute(db.select(Guest)).scalars().all()
     if not guests:
         return jsonify(message="No guests to export"), 404
@@ -294,10 +268,8 @@ def export_guests():
     output = io.StringIO()
     writer = csv.writer(output)
 
-    # Write header
     writer.writerow(['ID', 'First Name', 'Last Name', 'Party ID', 'Attending', 'Dietary Restrictions'])
 
-    # Write data
     for guest in guests:
         writer.writerow([
             guest.id,
@@ -321,7 +293,6 @@ def export_guests():
 @app.route('/api/public-rsvp/<int:guest_id>', methods=['PUT'])
 @cross_origin()
 def public_rsvp_update(guest_id):
-    """Publicly updates a guest's RSVP status. No authentication required."""
     guest = db.session.get(Guest, guest_id)
     if not guest:
         return jsonify(message="Guest not found"), 404
@@ -338,7 +309,6 @@ def public_rsvp_update(guest_id):
 
     db.session.commit()
     return jsonify(message=f"Updated RSVP for {guest.first_name} {guest.last_name}"), 200
-
 
 @app.route('/api/import-guests', methods=['POST'])
 @jwt_required()
