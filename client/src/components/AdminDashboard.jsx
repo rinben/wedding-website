@@ -306,13 +306,26 @@ function AdminDashboard() {
 
       <div className="admin-actions">
         <button onClick={handleExport}>Export Guest List</button>
-        <button onClick={handleImport}>Import Guest List</button>
         {selectedGuests.length > 0 && (
           <button onClick={handleMassDelete}>
             Delete Selected ({selectedGuests.length})
           </button>
         )}
         <button onClick={fetchGuests}>Refresh</button>
+      </div>
+
+      <div className="import-guests">
+        <h3>Import Guest List (CSV)</h3>
+        <label htmlFor="csv-upload" className="import-button">
+          Upload CSV
+        </label>
+        <input
+          id="csv-upload"
+          type="file"
+          accept=".csv"
+          onChange={handleImport}
+          style={{ display: "none" }}
+        />
       </div>
 
       <h3>Add New Guest</h3>
