@@ -339,5 +339,56 @@ def public_rsvp_update(guest_id):
     db.session.commit()
     return jsonify(message=f"Updated RSVP for {guest.first_name} {guest.last_name}"), 200
 
+
+@app.route('/api/import-guests', methods=['POST'])
+@jwt_required()
+@cross_origin()
+def import_guests():
+    """Imports guests from a CSV file. Requires JWT authentication."""
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    # We need to detect the encoding to handle different CSV files
+    raw_data = file.read()
+    file_encoding = chardet.detect(raw_data)['encoding']
+    if file_encoding is None:
+        file_encoding = 'utf-8' # Default to utf-8 if detection fails
+
+    stream = io.StringIO(raw_data.decode(file_encoding))
+    reader = csv.reader(stream)
+
+    # Skip header row
+    next(reader, None)
+
+    imported_count = 0
+    try:
+        for row in reader:
+            if len(row) >= 4:
+                first_name = row[0]
+                last_name = row[1]
+                party_id = row[2]
+                attending = row[3].lower() == 'yes' if len(row) > 3 and row[3] else False
+                dietary_restrictions = row[4] if len(row) > 4 and row[4] else ''
+
+                new_guest = Guest(
+                    first_name=first_name,
+                    last_name=last_name,
+                    party_id=party_id,
+                    attending=attending,
+                    dietary_restrictions=dietary_restrictions
+                )
+                db.session.add(new_guest)
+                imported_count += 1
+        db.session.commit()
+        return jsonify(message=f"Successfully imported {imported_count} guests"), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error during guest import: {e}")
+        return jsonify({"error": f"An error occurred during import: {e}"}), 500
+
 if __name__ == '__main__':
     app.run(debug=(not is_production))

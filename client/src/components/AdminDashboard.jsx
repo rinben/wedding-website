@@ -1,4 +1,3 @@
-// src/components/AdminDashboard.jsx
 import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../config"; // Import the new config file
 import { useAuth } from "../context/AuthContext";
@@ -250,6 +249,35 @@ function AdminDashboard() {
     }
   };
 
+  const handleImport = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/import-guests`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      alert("Guest list imported successfully!");
+      e.target.value = null; // Clear the input
+      fetchGuests(); // Refresh the list
+    } catch (error) {
+      console.error("Failed to import guest list:", error);
+      setError(error);
+    }
+  };
+
   const sortedGuests = [...guests].sort((a, b) => {
     const aValue = a[sortKey];
     const bValue = b[sortKey];
@@ -283,6 +311,20 @@ function AdminDashboard() {
           </button>
         )}
         <button onClick={fetchGuests}>Refresh</button>
+      </div>
+
+      <div className="import-guests">
+        <h3>Import Guest List (CSV)</h3>
+        <label htmlFor="csv-upload" className="import-button">
+          Upload CSV
+        </label>
+        <input
+          id="csv-upload"
+          type="file"
+          accept=".csv"
+          onChange={handleImport}
+          style={{ display: "none" }}
+        />
       </div>
 
       <h3>Add New Guest</h3>
