@@ -31,7 +31,7 @@ function AdminDashboard() {
 
   const fetchGuests = async () => {
     try {
-      const response = await fetch("${API_BASE_URL}/api/guests", {
+      const response = await fetch(`${API_BASE_URL}/api/guests`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -61,7 +61,7 @@ function AdminDashboard() {
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("${API_BASE_URL}/api/guests", {
+      const response = await fetch(`${API_BASE_URL}/api/guests`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -119,7 +119,7 @@ function AdminDashboard() {
       return;
 
     try {
-      const response = await fetch("${API_BASE_URL}/api/guests/mass-delete", {
+      const response = await fetch(`${API_BASE_URL}/api/guests/mass-delete`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -142,7 +142,7 @@ function AdminDashboard() {
 
   const handleExport = async () => {
     try {
-      const response = await fetch("${API_BASE_URL}/api/export-guests", {
+      const response = await fetch(`${API_BASE_URL}/api/export-guests`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -189,7 +189,7 @@ function AdminDashboard() {
         );
 
         if (shouldUpdateParty) {
-          await fetch("${API_BASE_URL}/api/party/update-id", {
+          await fetch(`${API_BASE_URL}/api/party/update-id`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
