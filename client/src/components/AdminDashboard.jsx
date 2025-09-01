@@ -250,6 +250,35 @@ function AdminDashboard() {
     }
   };
 
+  const handleImport = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/import-guests`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      alert("Guest list imported successfully!");
+      e.target.value = null; // Clear the input
+      fetchGuests(); // Refresh the list
+    } catch (error) {
+      console.error("Failed to import guest list:", error);
+      setError(error);
+    }
+  };
+
   const sortedGuests = [...guests].sort((a, b) => {
     const aValue = a[sortKey];
     const bValue = b[sortKey];
@@ -277,6 +306,7 @@ function AdminDashboard() {
 
       <div className="admin-actions">
         <button onClick={handleExport}>Export Guest List</button>
+        <button onClick={handleImport}>Import Guest List</button>
         {selectedGuests.length > 0 && (
           <button onClick={handleMassDelete}>
             Delete Selected ({selectedGuests.length})
