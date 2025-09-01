@@ -1,19 +1,20 @@
-# server/app.py
-import os # Used to get environment variables and manage file paths
+import os
 from werkzeug.wrappers import Request, Response
 from flask import Flask, jsonify, request, send_file
-from flask_cors import CORS, cross_origin # For handling Cross-Origin Resource Sharing
-from flask_sqlalchemy import SQLAlchemy # ORM for interacting with the database
-from flask_migrate import Migrate # For handling database schema migrations
-from flask_bcrypt import Bcrypt # For securely hashing passwords
+from flask_cors import CORS, cross_origin
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
-from datetime import timedelta # For setting token expiration time
+from datetime import timedelta
+from werkzeug.datastructures import FileStorage
 
 import io
 import csv
+import chardet # Used for character encoding detection in CSV import
 
 # --- APP CONFIGURATION ---
-# Initialize the Flask app. instance_relative_config=True makes paths relative to the instance folder.
+# Initialize the Flask app. `instance_relative_config=True` makes paths relative to the instance folder.
 app = Flask(__name__, instance_relative_config=True)
 
 # Create the instance folder if it doesn't exist, which is needed for SQLite.
