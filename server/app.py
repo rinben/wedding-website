@@ -368,11 +368,11 @@ def import_guests():
     try:
         for row in reader:
             if len(row) >= 4:
-                first_name = row[0]
-                last_name = row[1]
-                party_id = row[2]
-                attending = row[3].lower() == 'yes' if len(row) > 3 and row[3] else False
-                dietary_restrictions = row[4] if len(row) > 4 and row[4] else ''
+                first_name = row[1]
+                last_name = row[2]
+                party_id = row[3]
+                attending = row[4].lower() == 'yes' if len(row) > 4 and row[4] else False
+                dietary_restrictions = row[5] if len(row) > 5 and row[5] else ''
 
                 new_guest = Guest(
                     first_name=first_name,
