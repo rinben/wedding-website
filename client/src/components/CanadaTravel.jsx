@@ -22,7 +22,6 @@ function CanadaTravel() {
         ></iframe>
       </div>
 
-      <h3>Hotels and Motels</h3>
       <div className="travel-grid">
         <div className="travel-card">
           <h4>Lakeside Suites</h4>

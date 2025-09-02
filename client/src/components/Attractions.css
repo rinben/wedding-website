@@ -1,11 +1,11 @@
-/* src/components/CanadaTravel.css */
-.canada-travel-container {
+/* src/components/Attractions.css */
+.attractions-travel-container {
   padding: 2rem;
   font-family: var(--font-default);
   text-align: center;
 }
 
-.canada-travel-container h2 {
+.attractions-travel-container h2 {
   font-size: 3rem;
   color: var(--color-secondary);
   margin-bottom: 1rem;

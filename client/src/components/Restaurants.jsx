@@ -1,10 +1,10 @@
-// src/components/CanadaTravel.jsx
+// src/components/restaurants.jsx
 import React from "react";
-import "./CanadaTravel.css";
+import "./Restaurants.css";
 
-function CanadaTravel() {
+function restaurants() {
   return (
-    <div className="canada-travel-container">
+    <div className="restaurants-travel-container">
       <h2>Restaurants</h2>
       <p>
         Here are some of the best places to grab a bite in Crystal Beach and the
@@ -22,7 +22,6 @@ function CanadaTravel() {
         ></iframe>
       </div>
 
-      <h3>Restaurants</h3>
       <div className="travel-grid">
         <div className="travel-card">
           <h4>Crystal Ball Cafe</h4>
@@ -81,4 +80,4 @@ function CanadaTravel() {
   );
 }
 
-export default CanadaTravel;
+export default restaurants;

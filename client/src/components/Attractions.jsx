@@ -1,10 +1,10 @@
-// src/components/CanadaTravel.jsx
+// src/components/Attractions.jsx
 import React from "react";
-import "./CanadaTravel.css";
+import "./Attractions.css";
 
-function CanadaTravel() {
+function Attractions() {
   return (
-    <div className="canada-travel-container">
+    <div className="attractions-travel-container">
       <h2>Attractions</h2>
       <p>
         Here are some of the best places to visit in Crystal Beach and the
@@ -93,4 +93,4 @@ function CanadaTravel() {
   );
 }
 
-export default CanadaTravel;
+export default Attractions;
