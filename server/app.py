@@ -67,6 +67,29 @@ class Guest(db.Model):
     attending = db.Column(db.Boolean, default=False)
     dietary_restrictions = db.Column(db.Text, default='')
 
+# New Model for Registry Items
+class RegistryItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    link = db.Column(db.String(300), nullable=False) # Link to external retailer
+    price = db.Column(db.Float, nullable=False)
+    quantity_needed = db.Column(db.Integer, default=1)
+    quantity_claimed = db.Column(db.Integer, default=0)
+
+    # Status can be 'AVAILABLE', 'CLAIMED', 'FULFILLED'
+    status = db.Column(db.String(20), default='AVAILABLE')
+
+    # Audit trail for when the item was last claimed
+    last_claimed = db.Column(db.DateTime)
+
+# New Model for Security/Audit Log of Claims
+class ClaimLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('registry_item.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, server_default=db.func.now())
+    # Storing IP is for potential rate limiting/spam detection
+    ip_address = db.Column(db.String(45))
+
 # Helper function to convert a Guest object to a dictionary
 def serialize_guest(guest):
     return {
