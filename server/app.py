@@ -90,6 +90,8 @@ class ClaimLog(db.Model):
     # Storing IP is for potential rate limiting/spam detection
     ip_address = db.Column(db.String(45))
 
+# ----HELPER FUNCTIONS-----
+
 # Helper function to convert a Guest object to a dictionary
 def serialize_guest(guest):
     return {
@@ -99,6 +101,20 @@ def serialize_guest(guest):
         'party_id': guest.party_id,
         'attending': guest.attending,
         'dietary_restrictions': guest.dietary_restrictions,
+    }
+
+# New Helper function to serialize RegistryItem objects
+def serialize_registry_item(item):
+    return {
+        'id': item.id,
+        'name': item.name,
+        'link': item.link,
+        'price': item.price,
+        'quantityNeeded': item.quantity_needed,
+        'quantityClaimed': item.quantity_claimed,
+        'status': item.status,
+        'lastClaimed': item.last_claimed.isoformat() if item.last_claimed else None,
+        # We don't need to serialize the full ClaimLog here, just the item data.
     }
 
 # --- API ROUTES ---
@@ -412,6 +428,15 @@ def import_guests():
         db.session.rollback()
         print(f"Error during guest import: {e}")
         return jsonify({"error": f"An error occurred during import: {e}"}), 500
+
+
+@app.route('/api/registry', methods=['GET'])
+def get_registry_items():
+    # Only select items that are not fully claimed
+    # We can filter later, but for now, let's get all of them
+    items = db.session.execute(db.select(RegistryItem)).scalars()
+    return jsonify([serialize_registry_item(item) for item in items])
+
 
 if __name__ == '__main__':
     app.run(debug=(not is_production))
