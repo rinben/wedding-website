@@ -1,4 +1,6 @@
 import os
+import requests
+from bs4 import BeautifulSoup
 from werkzeug.wrappers import Request, Response
 from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS, cross_origin
@@ -116,6 +118,60 @@ def serialize_registry_item(item):
         'lastClaimed': item.last_claimed.isoformat() if item.last_claimed else None,
         # We don't need to serialize the full ClaimLog here, just the item data.
     }
+
+def scrape_price_from_url(url):
+    """Attempts to scrape a price from a given URL."""
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        # **CRITICAL:** Web scraping requires site-specific selectors.
+        # We will use general selectors common on e-commerce sites (OpenGraph, Schema Markup, etc.).
+
+        # 1. Look for Schema Markup (JSON-LD)
+        schema_script = soup.find('script', type='application/ld+json')
+        if schema_script:
+            import json
+            try:
+                data = json.loads(schema_script.string)
+                if isinstance(data, list):
+                    data = data[0] # Try the first element if it's a list
+
+                # Look for properties like 'offers' or 'price'
+                if 'offers' in data and 'price' in data['offers']:
+                    return float(data['offers']['price'])
+                if 'price' in data:
+                    return float(data['price'])
+            except json.JSONDecodeError:
+                pass # Ignore if JSON is invalid
+
+        # 2. Look for OpenGraph Meta Tags (for general product info)
+        og_price_tag = soup.find('meta', property='product:price:amount') or soup.find('meta', property='og:price:amount')
+        if og_price_tag and og_price_tag.get('content'):
+            return float(og_price_tag['content'].replace('$', '').replace(',', ''))
+
+        # 3. Look for common price classes (Last resort, highly site-dependent)
+        price_elements = soup.find_all(lambda tag: tag.name in ['span', 'div'] and ('price' in tag.get('class', []) or 'sale' in tag.get('class', [])))
+        for elem in price_elements:
+            text = elem.get_text(strip=True)
+            if '$' in text:
+                # Clean and return the first reasonable price found
+                return float(text.replace('$', '').replace(',', '').strip())
+
+        return None # Price not found
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching URL {url}: {e}")
+        return None
+    except Exception as e:
+        print(f"Error scraping price from {url}: {e}")
+        return None
+
 
 # --- API ROUTES ---
 @app.route('/')
@@ -437,6 +493,53 @@ def get_registry_items():
     items = db.session.execute(db.select(RegistryItem)).scalars()
     return jsonify([serialize_registry_item(item) for item in items])
 
+@app.route('/api/admin/price-lookup', methods=['POST'])
+@jwt_required()
+@cross_origin()
+def admin_price_lookup():
+    """Securely scrapes the price from a given URL."""
+    data = request.json
+    url = data.get('url')
+    if not url:
+        return jsonify({"msg": "URL is required"}), 400
+
+    price = scrape_price_from_url(url)
+
+    if price is not None:
+        return jsonify({"price": price, "msg": f"Price found: ${price}"}), 200
+    else:
+        return jsonify({"msg": "Could not determine price from the provided URL. Manual entry required."}), 404
+
+@app.route('/api/admin/registry', methods=['POST'])
+@jwt_required()
+@cross_origin()
+def add_registry_item():
+    """Securely adds a new registry item to the database."""
+    try:
+        data = request.json
+
+        # Validate required fields
+        if not all(key in data for key in ['name', 'link', 'price', 'quantityNeeded']):
+            return jsonify({"msg": "Missing required fields (name, link, price, quantityNeeded)"}), 400
+
+        # Create a new RegistryItem object
+        new_item = RegistryItem(
+            name=data['name'],
+            link=data['link'],
+            price=data['price'],
+            quantity_needed=data['quantityNeeded'],
+            # quantity_claimed defaults to 0 and status defaults to 'AVAILABLE'
+        )
+
+        db.session.add(new_item)
+        db.session.commit()
+
+        return jsonify(serialize_registry_item(new_item)), 201
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error adding registry item: {e}")
+        return jsonify(message="An internal server error occurred while adding the item"), 500
 
 if __name__ == '__main__':
     app.run(debug=(not is_production))
