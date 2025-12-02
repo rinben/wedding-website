@@ -91,7 +91,7 @@ function Registry() {
   };
 
   // New function to handle the claim confirmation when the user returns (Claim logic step 2)
-  const handleClaimConfirmation = (isConfirmed) => {
+  const handleClaimConfirmation = async (isConfirmed) => {
     const itemId = claimItemId;
 
     // 1. Clear the storage regardless of their answer
@@ -99,11 +99,34 @@ function Registry() {
     setClaimItemId(null); // Clear the prompt
 
     if (isConfirmed && itemId) {
-      // *** NEXT STEP: We will implement the backend API call here to mark the item as claimed ***
-      // For now, give immediate feedback and refresh the list
-      alert("Thank you! This item is now marked as claimed.");
+      // --- START: NEW BACKEND CLAIM API CALL ---
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/registry/claim/${itemId}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            // No body needed for this simple claim post
+          },
+        );
 
-      // 2. Refresh the registry list to show the new status
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(`Success! ${result.message} It is now marked as claimed.`);
+        } else {
+          // Display error message from backend (e.g., "Item already claimed")
+          alert(`Claim Failed: ${result.message}`);
+        }
+      } catch (error) {
+        console.error("Claim error:", error);
+        alert("Error connecting to the server. Please check your connection.");
+      }
+      // --- END: NEW BACKEND CLAIM API CALL ---
+
+      // 2. Refresh the registry list to show the new status immediately
       fetchRegistryItems();
     } else if (isConfirmed) {
       alert("Claim failed: Item ID not found.");
