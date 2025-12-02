@@ -86,7 +86,7 @@ function Registry() {
       localStorage.setItem("pendingRegistryClaim", item.id);
 
       // 2. Manually redirect the browser
-      window.location.href = item.link;
+      window.open(item.link, "_blank");
     }
   };
 
