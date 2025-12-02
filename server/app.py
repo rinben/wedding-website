@@ -605,16 +605,42 @@ def update_registry_item_status(item_id):
         if new_status not in ['AVAILABLE', 'CLAIMED', 'FULFILLED']:
             return jsonify(message="Invalid status provided"), 400
 
+        # CRITICAL FIX: If relisting, reset the quantity claimed
+        if new_status == 'AVAILABLE':
+            item.quantity_claimed = 0
+
         item.status = new_status
         db.session.commit()
 
-        # The serialize_registry_item function should be available from your existing code
         return jsonify(serialize_registry_item(item)), 200
 
     except Exception as e:
         db.session.rollback()
         print(f"Error updating registry item status: {e}")
         return jsonify(message="An error occurred while updating the item status"), 500
+
+@app.route('/api/admin/registry/<int:item_id>', methods=['DELETE'])
+@jwt_required()
+@cross_origin()
+def delete_registry_item(item_id):
+    """Allows admin to delete a registry item. Requires JWT authentication."""
+    try:
+        item = db.session.get(RegistryItem, item_id)
+        if not item:
+            return jsonify(message="Registry item not found"), 404
+
+        # Optionally, delete related ClaimLog entries first to avoid foreign key issues
+        ClaimLog.query.filter_by(item_id=item_id).delete()
+
+        db.session.delete(item)
+        db.session.commit()
+
+        return jsonify(message="Registry item deleted successfully"), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting registry item: {e}")
+        return jsonify(message="An error occurred while deleting the item"), 500
 
 if __name__ == '__main__':
     app.run(debug=(not is_production))
