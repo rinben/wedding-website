@@ -9,12 +9,12 @@ const HONEYMOON_FUND = {
   id: "fund-honeymoon",
   name: "Honeymoon Fund",
   link: "https://withjoy.com/sara-and-ben-sep-26/registry", // Ensure this has https://
-  price: 5000.0,
+  price: 5000.0, // Goal (Internal tracking only)
   quantityNeeded: 1,
   quantityClaimed: 0,
   status: "AVAILABLE",
   isFund: true,
-  imagePath: "/honeymoon-fund.jpg",
+  imagePath: "/honeymoon-fund.jpg", // Add this image to your public folder
   description:
     "Help us make our dream honeymoon a reality! Every contribution makes a difference.",
 };
@@ -23,7 +23,7 @@ const HOME_UPGRADE_FUND = {
   id: "fund-home",
   name: "Home Upgrade Fund",
   link: "https://withjoy.com/sara-and-ben-sep-26/registry", // Ensure this has https://
-  price: 3000.0,
+  price: 3000.0, // Goal (Internal tracking only)
   quantityNeeded: 1,
   quantityClaimed: 0,
   status: "AVAILABLE",
@@ -42,14 +42,6 @@ function Registry() {
   const [showClaimed, setShowClaimed] = useState(false);
   const [claimItemId, setClaimItemId] = useState(null);
 
-  // New function to check localStorage and update state on focus
-  const checkPendingClaim = () => {
-    const pendingClaimId = localStorage.getItem("pendingRegistryClaim");
-    if (pendingClaimId) {
-      setClaimItemId(pendingClaimId);
-    }
-  };
-
   // Function to fetch the physical items
   const fetchRegistryItems = async () => {
     try {
@@ -66,21 +58,16 @@ function Registry() {
     }
   };
 
-  // COMBINED useEffect: Checks Local Storage, fetches data, AND monitors tab focus
+  // COMBINED useEffect: Checks Local Storage AND fetches data
   useEffect(() => {
-    // 1. Initial check
-    checkPendingClaim();
+    // 1. Check Local Storage on component mount
+    const pendingClaimId = localStorage.getItem("pendingRegistryClaim");
+    if (pendingClaimId) {
+      setClaimItemId(pendingClaimId);
+    }
 
-    // 2. Add event listeners to check when the tab regains focus
-    window.addEventListener("focus", checkPendingClaim);
-
-    // 3. Initial data fetch
+    // 2. Fetch the data
     fetchRegistryItems();
-
-    // 4. Cleanup: Remove the event listener when the component unmounts
-    return () => {
-      window.removeEventListener("focus", checkPendingClaim);
-    };
   }, []); // Runs once on mount
 
   // New function to handle the pre-purchase click (Claim logic step 1)
@@ -93,11 +80,14 @@ function Registry() {
     );
 
     if (proceed) {
-      // 1. Save the item ID to local storage
+      // 1. Save the item ID to local storage (for state persistence on accidental refresh)
       localStorage.setItem("pendingRegistryClaim", item.id);
 
-      // 2. Open the link in a new tab (The FIX for step 46)
+      // 2. Open the link in a new tab (Fix for step 46)
       window.open(item.link, "_blank");
+
+      // 3. GUARANTEED FIX: Immediately set state to show the modal card on the current screen
+      setClaimItemId(item.id);
     }
   };
 
@@ -148,6 +138,7 @@ function Registry() {
 
   // Filter items based on the toggle button
   const filteredItems = allItems.filter((item) => {
+    // Funds are always visible regardless of toggle
     if (item.isFund) {
       return true;
     }
@@ -156,31 +147,15 @@ function Registry() {
       item.quantityClaimed >= item.quantityNeeded &&
       item.status !== "AVAILABLE";
 
+    // If showClaimed is true, return all items
     if (showClaimed) {
       return true;
     }
+    // If showClaimed is false, return only physical items that are NOT fulfilled
     return !isFulfilled;
   });
 
-  // --- GUARD CLAUSE FOR MODAL (This is what renders the prompt!) ---
-  if (claimItemId) {
-    const itemToConfirm = allItems.find((item) => item.id === claimItemId);
-    if (itemToConfirm) {
-      return (
-        <div className="claim-confirmation-modal">
-          <h2>Welcome Back!</h2>
-          <p>Did you successfully purchase **{itemToConfirm.name}**?</p>
-          <button onClick={() => handleClaimConfirmation(true)}>
-            Yes, I purchased it!
-          </button>
-          <button onClick={() => handleClaimConfirmation(false)}>
-            No, not yet.
-          </button>
-        </div>
-      );
-    }
-  }
-
+  // --- RENDERING CHECKS (Must be placed before the final return) ---
   if (loading)
     return <div className="registry-page-container">Loading Registry...</div>;
   if (error)
@@ -231,8 +206,10 @@ function Registry() {
 
               {/* DESCRIPTION & DISPLAY LOGIC: Checks isFund to hide Price/Quantity */}
               {item.isFund ? (
+                // Displays only the description for funds
                 <p>{item.description}</p>
               ) : (
+                // Displays Price and Quantity for physical items
                 <>
                   <p>Price: ${item.price ? item.price.toFixed(2) : "N/A"}</p>
 
@@ -265,6 +242,30 @@ function Registry() {
           );
         })}
       </div>
+
+      {/* --- MODAL OVERLAY RENDER --- */}
+      {claimItemId && (
+        <div className="claim-confirmation-modal-overlay">
+          <div className="claim-confirmation-card">
+            <h2>Purchase Confirmation</h2>
+            <p>
+              You opened the link to **
+              {allItems.find((item) => item.id === claimItemId)?.name ||
+                "an item"}
+              **.
+            </p>
+            <p>Did you successfully complete the purchase?</p>
+            <div className="modal-buttons">
+              <button onClick={() => handleClaimConfirmation(true)}>
+                Yes, I purchased it!
+              </button>
+              <button onClick={() => handleClaimConfirmation(false)}>
+                No, I canceled it.
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
