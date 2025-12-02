@@ -3,14 +3,13 @@ import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import "./Registry.css";
 
-// --- FUND DEFINITIONS (Absolute URLs added for correctness) ---
+// --- FUND DEFINITIONS (Absolute URLs ensured) ---
 
 const HONEYMOON_FUND = {
   id: "fund-honeymoon",
   name: "Honeymoon Fund",
-  // CORRECTED: Added https:// for absolute URL
-  link: "https://withjoy.com/sara-and-ben-sep-26/registry",
-  price: 5000.0, // Goal (Internal tracking only)
+  link: "https://withjoy.com/sara-and-ben-sep-26/registry", // Ensure this has https://
+  price: 5000.0,
   quantityNeeded: 1,
   quantityClaimed: 0,
   status: "AVAILABLE",
@@ -23,9 +22,8 @@ const HONEYMOON_FUND = {
 const HOME_UPGRADE_FUND = {
   id: "fund-home",
   name: "Home Upgrade Fund",
-  // CORRECTED: Added https:// for absolute URL
-  link: "https://withjoy.com/sara-and-ben-sep-26/registry",
-  price: 3000.0, // Goal (Internal tracking only)
+  link: "https://withjoy.com/sara-and-ben-sep-26/registry", // Ensure this has https://
+  price: 3000.0,
   quantityNeeded: 1,
   quantityClaimed: 0,
   status: "AVAILABLE",
@@ -85,7 +83,7 @@ function Registry() {
       // 1. Save the item ID to local storage
       localStorage.setItem("pendingRegistryClaim", item.id);
 
-      // 2. Manually redirect the browser
+      // 2. Open the link in a new tab (The FIX for step 46)
       window.open(item.link, "_blank");
     }
   };
@@ -99,7 +97,7 @@ function Registry() {
     setClaimItemId(null); // Clear the prompt
 
     if (isConfirmed && itemId) {
-      // --- START: NEW BACKEND CLAIM API CALL ---
+      // --- START: BACKEND CLAIM API CALL ---
       try {
         const response = await fetch(
           `${API_BASE_URL}/api/registry/claim/${itemId}`,
@@ -108,7 +106,6 @@ function Registry() {
             headers: {
               "Content-Type": "application/json",
             },
-            // No body needed for this simple claim post
           },
         );
 
@@ -124,7 +121,7 @@ function Registry() {
         console.error("Claim error:", error);
         alert("Error connecting to the server. Please check your connection.");
       }
-      // --- END: NEW BACKEND CLAIM API CALL ---
+      // --- END: BACKEND CLAIM API CALL ---
 
       // 2. Refresh the registry list to show the new status immediately
       fetchRegistryItems();
@@ -138,26 +135,21 @@ function Registry() {
 
   // Filter items based on the toggle button
   const filteredItems = allItems.filter((item) => {
-    // Funds are always visible regardless of toggle
     if (item.isFund) {
       return true;
     }
 
-    // Check if a physical item is fulfilled
     const isFulfilled =
       item.quantityClaimed >= item.quantityNeeded &&
       item.status !== "AVAILABLE";
 
-    // If showClaimed is true, return all items
     if (showClaimed) {
       return true;
     }
-    // If showClaimed is false, return only physical items that are NOT fulfilled
     return !isFulfilled;
   });
 
-  // --- GUARD CLAUSE FOR MODAL ---
-  // This must be placed before the main return to interrupt the rendering flow.
+  // --- GUARD CLAUSE FOR MODAL (This is what renders the prompt!) ---
   if (claimItemId) {
     const itemToConfirm = allItems.find((item) => item.id === claimItemId);
     if (itemToConfirm) {
@@ -226,10 +218,8 @@ function Registry() {
 
               {/* DESCRIPTION & DISPLAY LOGIC: Checks isFund to hide Price/Quantity */}
               {item.isFund ? (
-                // Displays only the description for funds
                 <p>{item.description}</p>
               ) : (
-                // Displays Price and Quantity for physical items
                 <>
                   <p>Price: ${item.price ? item.price.toFixed(2) : "N/A"}</p>
 
@@ -255,7 +245,6 @@ function Registry() {
                   item.isFund ? undefined : (e) => handlePurchaseClick(e, item)
                 }
                 className={`registry-button ${isFulfilled && !item.isFund ? "disabled" : ""}`}
-                // The fund link is handled by the browser's default behavior, which is fine.
               >
                 {buttonText}
               </a>
