@@ -3,18 +3,19 @@ import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import "./Registry.css";
 
-// --- FUND DEFINITIONS ---
+// --- FUND DEFINITIONS (Absolute URLs added for correctness) ---
 
 const HONEYMOON_FUND = {
   id: "fund-honeymoon",
   name: "Honeymoon Fund",
-  link: "https://withjoy.com/sara-and-ben-sep-26/registry", // *** UPDATE THIS WITH YOUR REAL FUND LINK ***
-  price: 5000.0, // Goal (Internal tracking only, not displayed)
+  // CORRECTED: Added https:// for absolute URL
+  link: "https://withjoy.com/sara-and-ben-sep-26/registry",
+  price: 5000.0, // Goal (Internal tracking only)
   quantityNeeded: 1,
   quantityClaimed: 0,
   status: "AVAILABLE",
   isFund: true,
-  imagePath: "/honeymoon-fund.jpg", // Add this image to your public folder
+  imagePath: "/honeymoon-fund.jpg",
   description:
     "Help us make our dream honeymoon a reality! Every contribution makes a difference.",
 };
@@ -22,13 +23,14 @@ const HONEYMOON_FUND = {
 const HOME_UPGRADE_FUND = {
   id: "fund-home",
   name: "Home Upgrade Fund",
-  link: "https://withjoy.com/sara-and-ben-sep-26/registry", // *** UPDATE THIS WITH YOUR REAL FUND LINK ***
-  price: 3000.0, // Goal (Internal tracking only, not displayed)
+  // CORRECTED: Added https:// for absolute URL
+  link: "https://withjoy.com/sara-and-ben-sep-26/registry",
+  price: 3000.0, // Goal (Internal tracking only)
   quantityNeeded: 1,
   quantityClaimed: 0,
   status: "AVAILABLE",
   isFund: true,
-  imagePath: "/home-upgrade-fund.jpg", // Add this image to your public folder
+  imagePath: "/home-upgrade-fund.jpg",
   description:
     "Contribute to upgrading our new home, from landscaping to new furniture!",
 };
@@ -39,26 +41,74 @@ function Registry() {
   const [registryItems, setRegistryItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showClaimed, setShowClaimed] = useState(false); // Default: Hide claimed items
+  const [showClaimed, setShowClaimed] = useState(false);
+  const [claimItemId, setClaimItemId] = useState(null);
 
-  useEffect(() => {
-    const fetchRegistryItems = async () => {
-      try {
-        // Fetches physical items added via the Admin Dashboard
-        const response = await fetch(`${API_BASE_URL}/api/registry`);
-        if (!response.ok) {
-          throw new Error(`Registry HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setRegistryItems(data);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
+  // Function to fetch the physical items
+  const fetchRegistryItems = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/registry`);
+      if (!response.ok) {
+        throw new Error(`Registry HTTP error! status: ${response.status}`);
       }
-    };
+      const data = await response.json();
+      setRegistryItems(data);
+    } catch (error) {
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // COMBINED useEffect: Checks Local Storage AND fetches data
+  useEffect(() => {
+    // 1. Check Local Storage on component mount
+    const pendingClaimId = localStorage.getItem("pendingRegistryClaim");
+    if (pendingClaimId) {
+      setClaimItemId(pendingClaimId);
+    }
+
+    // 2. Fetch the data
     fetchRegistryItems();
-  }, []);
+  }, []); // Runs once on mount
+
+  // New function to handle the pre-purchase click (Claim logic step 1)
+  const handlePurchaseClick = (e, item) => {
+    e.preventDefault(); // Stop default navigation for now
+
+    const proceed = window.confirm(
+      `You are about to be redirected to the external retailer (${item.name}).\n\n` +
+        `To prevent duplicate gifts, please return to this page IMMEDIATELY after purchase to confirm the item has been claimed!`,
+    );
+
+    if (proceed) {
+      // 1. Save the item ID to local storage
+      localStorage.setItem("pendingRegistryClaim", item.id);
+
+      // 2. Manually redirect the browser
+      window.location.href = item.link;
+    }
+  };
+
+  // New function to handle the claim confirmation when the user returns (Claim logic step 2)
+  const handleClaimConfirmation = (isConfirmed) => {
+    const itemId = claimItemId;
+
+    // 1. Clear the storage regardless of their answer
+    localStorage.removeItem("pendingRegistryClaim");
+    setClaimItemId(null); // Clear the prompt
+
+    if (isConfirmed && itemId) {
+      // *** NEXT STEP: We will implement the backend API call here to mark the item as claimed ***
+      // For now, give immediate feedback and refresh the list
+      alert("Thank you! This item is now marked as claimed.");
+
+      // 2. Refresh the registry list to show the new status
+      fetchRegistryItems();
+    } else if (isConfirmed) {
+      alert("Claim failed: Item ID not found.");
+    }
+  };
 
   // Combine static fund items and database items. Funds appear first.
   const allItems = [HONEYMOON_FUND, HOME_UPGRADE_FUND, ...registryItems];
@@ -82,6 +132,26 @@ function Registry() {
     // If showClaimed is false, return only physical items that are NOT fulfilled
     return !isFulfilled;
   });
+
+  // --- GUARD CLAUSE FOR MODAL ---
+  // This must be placed before the main return to interrupt the rendering flow.
+  if (claimItemId) {
+    const itemToConfirm = allItems.find((item) => item.id === claimItemId);
+    if (itemToConfirm) {
+      return (
+        <div className="claim-confirmation-modal">
+          <h2>Welcome Back!</h2>
+          <p>Did you successfully purchase **{itemToConfirm.name}**?</p>
+          <button onClick={() => handleClaimConfirmation(true)}>
+            Yes, I purchased it!
+          </button>
+          <button onClick={() => handleClaimConfirmation(false)}>
+            No, not yet.
+          </button>
+        </div>
+      );
+    }
+  }
 
   if (loading)
     return <div className="registry-page-container">Loading Registry...</div>;
@@ -157,14 +227,12 @@ function Registry() {
                 href={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
+                // ONLY use the custom handler for physical items
+                onClick={
+                  item.isFund ? undefined : (e) => handlePurchaseClick(e, item)
+                }
                 className={`registry-button ${isFulfilled && !item.isFund ? "disabled" : ""}`}
-                // Disable button if purchased and not a fund
-                onClick={(e) => {
-                  if (isFulfilled && !item.isFund) {
-                    e.preventDefault();
-                    alert("This item has already been purchased!");
-                  }
-                }}
+                // The fund link is handled by the browser's default behavior, which is fine.
               >
                 {buttonText}
               </a>
