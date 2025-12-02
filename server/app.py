@@ -437,6 +437,20 @@ def get_registry_items():
     items = db.session.execute(db.select(RegistryItem)).scalars()
     return jsonify([serialize_registry_item(item) for item in items])
 
+@app.route('/api/migrate_db_once', methods=['POST'])
+@cross_origin()
+def migrate_db_once():
+    # !!! WARNING: DELETE THIS ROUTE IMMEDIATELY AFTER USE !!!
+    try:
+        from flask_migrate import upgrade
+        with app.app_context():
+            upgrade()
+        return jsonify({"msg": "Database migration successful! Tables are now created."}), 200
+    except Exception as e:
+        # Rollback in case of error
+        db.session.rollback()
+        return jsonify({"msg": f"Migration failed: {e.__class__.__name__}: {str(e)}"}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=(not is_production))
