@@ -249,10 +249,10 @@ function Registry() {
           <div className="claim-confirmation-card">
             <h2>Purchase Confirmation</h2>
             <p>
-              You opened the link to **
+              You opened the link to
               {allItems.find((item) => item.id === claimItemId)?.name ||
                 "an item"}
-              **.
+              .
             </p>
             <p>Did you successfully complete the purchase?</p>
             <div className="modal-buttons">
