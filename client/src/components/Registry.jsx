@@ -8,7 +8,7 @@ import "./Registry.css";
 const HONEYMOON_FUND = {
   id: "fund-honeymoon",
   name: "Honeymoon Fund",
-  link: "www.hitchd.com/benandsara", // *** UPDATE THIS WITH YOUR REAL FUND LINK ***
+  link: "https://withjoy.com/sara-and-ben-sep-26/registry", // *** UPDATE THIS WITH YOUR REAL FUND LINK ***
   price: 5000.0, // Goal (Internal tracking only, not displayed)
   quantityNeeded: 1,
   quantityClaimed: 0,
@@ -22,7 +22,7 @@ const HONEYMOON_FUND = {
 const HOME_UPGRADE_FUND = {
   id: "fund-home",
   name: "Home Upgrade Fund",
-  link: "www.hitchd.com/benandsara", // *** UPDATE THIS WITH YOUR REAL FUND LINK ***
+  link: "https://withjoy.com/sara-and-ben-sep-26/registry", // *** UPDATE THIS WITH YOUR REAL FUND LINK ***
   price: 3000.0, // Goal (Internal tracking only, not displayed)
   quantityNeeded: 1,
   quantityClaimed: 0,
