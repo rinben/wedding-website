@@ -42,6 +42,14 @@ function Registry() {
   const [showClaimed, setShowClaimed] = useState(false);
   const [claimItemId, setClaimItemId] = useState(null);
 
+  // New function to check localStorage and update state on focus
+  const checkPendingClaim = () => {
+    const pendingClaimId = localStorage.getItem("pendingRegistryClaim");
+    if (pendingClaimId) {
+      setClaimItemId(pendingClaimId);
+    }
+  };
+
   // Function to fetch the physical items
   const fetchRegistryItems = async () => {
     try {
@@ -58,16 +66,21 @@ function Registry() {
     }
   };
 
-  // COMBINED useEffect: Checks Local Storage AND fetches data
+  // COMBINED useEffect: Checks Local Storage, fetches data, AND monitors tab focus
   useEffect(() => {
-    // 1. Check Local Storage on component mount
-    const pendingClaimId = localStorage.getItem("pendingRegistryClaim");
-    if (pendingClaimId) {
-      setClaimItemId(pendingClaimId);
-    }
+    // 1. Initial check
+    checkPendingClaim();
 
-    // 2. Fetch the data
+    // 2. Add event listeners to check when the tab regains focus
+    window.addEventListener("focus", checkPendingClaim);
+
+    // 3. Initial data fetch
     fetchRegistryItems();
+
+    // 4. Cleanup: Remove the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("focus", checkPendingClaim);
+    };
   }, []); // Runs once on mount
 
   // New function to handle the pre-purchase click (Claim logic step 1)
