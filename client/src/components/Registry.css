@@ -52,3 +52,44 @@
 .registry-button:hover {
   background-color: #b3777d;
 }
+
+.registry-toggle-button {
+  background-color: var(--color-accent-1);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 2rem;
+  transition: background-color 0.3s ease;
+}
+
+.registry-toggle-button:hover {
+  background-color: #d89e3a; /* Slightly darker orange */
+}
+
+/* Styling for claimed/purchased items */
+.registry-card.claimed {
+  opacity: 0.6;
+  border: 2px solid var(--color-secondary);
+}
+
+.registry-card.claimed .registry-button {
+  background-color: #6c757d; /* Gray color for claimed button */
+  pointer-events: none; /* Prevents the button from being clickable */
+  cursor: not-allowed;
+}
+
+/* Ensure registry-grid uses the same card layout as travel */
+.registry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.registry-card img {
+  height: 200px; /* Standardize image height for better grid look */
+  object-fit: cover;
+}
