@@ -541,5 +541,32 @@ def add_registry_item():
         print(f"Error adding registry item: {e}")
         return jsonify(message="An internal server error occurred while adding the item"), 500
 
+@app.route('/api/admin/registry/<int:item_id>/status', methods=['PUT'])
+@jwt_required()
+@cross_origin()
+def update_registry_item_status(item_id):
+    """Allows admin to manually change item status (e.g., mark as FULFILLED or re-list)."""
+    try:
+        item = db.session.get(RegistryItem, item_id)
+        if not item:
+            return jsonify(message="Registry item not found"), 404
+
+        data = request.json
+        new_status = data.get('status')
+
+        if new_status not in ['AVAILABLE', 'CLAIMED', 'FULFILLED']:
+            return jsonify(message="Invalid status provided"), 400
+
+        item.status = new_status
+        db.session.commit()
+
+        # The serialize_registry_item function should be available from your existing code
+        return jsonify(serialize_registry_item(item)), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating registry item status: {e}")
+        return jsonify(message="An error occurred while updating the item status"), 500
+
 if __name__ == '__main__':
     app.run(debug=(not is_production))

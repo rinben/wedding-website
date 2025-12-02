@@ -3,20 +3,37 @@ import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import "./Registry.css";
 
-// Honeymoon Fund object (static data for the fund)
+// --- FUND DEFINITIONS ---
+
 const HONEYMOON_FUND = {
-  id: "fund",
+  id: "fund-honeymoon",
   name: "Honeymoon Fund",
-  link: "https://example.com/honeymoon-fund", // *** UPDATE THIS WITH YOUR REAL FUND LINK ***
-  price: 5000.0, // Honeymoon Goal
+  link: "www.hitchd.com/benandsara", // *** UPDATE THIS WITH YOUR REAL FUND LINK ***
+  price: 5000.0, // Goal (Internal tracking only, not displayed)
   quantityNeeded: 1,
   quantityClaimed: 0,
   status: "AVAILABLE",
   isFund: true,
-  imagePath: "/honeymoon-fund.jpg", // Add a fitting image to your public folder
+  imagePath: "/honeymoon-fund.jpg", // Add this image to your public folder
   description:
     "Help us make our dream honeymoon a reality! Every contribution makes a difference.",
 };
+
+const HOME_UPGRADE_FUND = {
+  id: "fund-home",
+  name: "Home Upgrade Fund",
+  link: "www.hitchd.com/benandsara", // *** UPDATE THIS WITH YOUR REAL FUND LINK ***
+  price: 3000.0, // Goal (Internal tracking only, not displayed)
+  quantityNeeded: 1,
+  quantityClaimed: 0,
+  status: "AVAILABLE",
+  isFund: true,
+  imagePath: "/home-upgrade-fund.jpg", // Add this image to your public folder
+  description:
+    "Contribute to upgrading our new home, from landscaping to new furniture!",
+};
+
+// --- MAIN COMPONENT ---
 
 function Registry() {
   const [registryItems, setRegistryItems] = useState([]);
@@ -27,6 +44,7 @@ function Registry() {
   useEffect(() => {
     const fetchRegistryItems = async () => {
       try {
+        // Fetches physical items added via the Admin Dashboard
         const response = await fetch(`${API_BASE_URL}/api/registry`);
         if (!response.ok) {
           throw new Error(`Registry HTTP error! status: ${response.status}`);
@@ -42,12 +60,17 @@ function Registry() {
     fetchRegistryItems();
   }, []);
 
-  // Combine database items and the static fund item
-  const allItems = [HONEYMOON_FUND, ...registryItems];
+  // Combine static fund items and database items. Funds appear first.
+  const allItems = [HONEYMOON_FUND, HOME_UPGRADE_FUND, ...registryItems];
 
   // Filter items based on the toggle button
   const filteredItems = allItems.filter((item) => {
-    // A fund is always shown unless we specifically mark it as fulfilled
+    // Funds are always visible regardless of toggle
+    if (item.isFund) {
+      return true;
+    }
+
+    // Check if a physical item is fulfilled
     const isFulfilled =
       item.quantityClaimed >= item.quantityNeeded &&
       item.status !== "AVAILABLE";
@@ -56,8 +79,8 @@ function Registry() {
     if (showClaimed) {
       return true;
     }
-    // If showClaimed is false, return only items that are NOT fulfilled
-    return !isFulfilled || item.isFund; // Always show funds, only show items if NOT fulfilled
+    // If showClaimed is false, return only physical items that are NOT fulfilled
+    return !isFulfilled;
   });
 
   if (loading)
@@ -85,7 +108,7 @@ function Registry() {
 
       <div className="registry-grid">
         {filteredItems.map((item) => {
-          // Determine if item is claimed/fulfilled to style the card
+          // Determine status for styling
           const isFulfilled =
             item.quantityClaimed >= item.quantityNeeded &&
             item.status !== "AVAILABLE";
@@ -95,6 +118,8 @@ function Registry() {
             : isClaimedByAdmin
               ? "Purchased / Fulfilled"
               : "View & Purchase";
+
+          // Image Path logic: Use item's path or a generic placeholder
           const imageSrc = item.imagePath || "/registry-default.jpg";
 
           return (
@@ -102,26 +127,29 @@ function Registry() {
               key={item.id}
               className={`registry-card ${isFulfilled ? "claimed" : ""}`}
             >
-              {/* NOTE: You should add images for your items to your client/public folder */}
+              {/* Image */}
               <img src={imageSrc} alt={item.name} />
               <h3>{item.name}</h3>
 
-              {/* Price / Fund Goal Display */}
+              {/* DESCRIPTION & DISPLAY LOGIC: Checks isFund to hide Price/Quantity */}
               {item.isFund ? (
+                // Displays only the description for funds
                 <p>{item.description}</p>
               ) : (
-                <p>Price: ${item.price ? item.price.toFixed(2) : "N/A"}</p>
-              )}
+                // Displays Price and Quantity for physical items
+                <>
+                  <p>Price: ${item.price ? item.price.toFixed(2) : "N/A"}</p>
 
-              {/* Quantity Display */}
-              {!item.isFund && item.quantityNeeded > 0 && (
-                <p>
-                  Needed: {item.quantityNeeded - item.quantityClaimed} of{" "}
-                  {item.quantityNeeded}
-                  {item.quantityClaimed > 0 && (
-                    <span> (Claimed: {item.quantityClaimed})</span>
+                  {item.quantityNeeded > 0 && (
+                    <p>
+                      Needed: {item.quantityNeeded - item.quantityClaimed} of{" "}
+                      {item.quantityNeeded}
+                      {item.quantityClaimed > 0 && (
+                        <span> (Claimed: {item.quantityClaimed})</span>
+                      )}
+                    </p>
                   )}
-                </p>
+                </>
               )}
 
               {/* Button */}
