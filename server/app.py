@@ -8,7 +8,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
-from datetime import timedelta
+from datetime import timedelta, datetime
+from sqlalchemy.exc import IntegrityError
 from werkzeug.datastructures import FileStorage
 
 import io
@@ -492,6 +493,53 @@ def get_registry_items():
     # We can filter later, but for now, let's get all of them
     items = db.session.execute(db.select(RegistryItem)).scalars()
     return jsonify([serialize_registry_item(item) for item in items])
+
+@app.route('/api/registry/claim/<int:item_id>', methods=['POST'])
+@cross_origin()
+def claim_registry_item(item_id):
+    """
+    Public endpoint to claim a single unit of a registry item.
+    Increments the claimed quantity and logs the attempt.
+    """
+    try:
+        item = db.session.get(RegistryItem, item_id)
+        if not item:
+            return jsonify(message="Registry item not found"), 404
+
+        # 1. Check if item is already fulfilled
+        if item.status == 'FULFILLED' or item.quantity_claimed >= item.quantity_needed:
+            return jsonify(message="This item is already claimed or fulfilled."), 409
+
+        # 2. Update item quantity and status
+        item.quantity_claimed += 1
+
+        # Check if the item is now fully claimed
+        if item.quantity_claimed >= item.quantity_needed:
+            item.status = 'FULFILLED'
+        else:
+            item.status = 'CLAIMED'
+
+        item.last_claimed = datetime.utcnow()
+
+        # 3. Log the claim attempt for audit/security (rate limiting)
+        # Get IP address - robust method for Vercel/proxies
+        ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+
+        new_log = ClaimLog(
+            item_id=item.id,
+            ip_address=ip_address
+        )
+        db.session.add(new_log)
+        db.session.commit()
+
+        return jsonify(message=f"Successfully claimed 1 unit of {item.name}.",
+                       status=item.status,
+                       quantity_claimed=item.quantity_claimed), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error processing claim for item {item_id}: {e}")
+        return jsonify(message="An unexpected error occurred while claiming the item."), 500
 
 @app.route('/api/admin/price-lookup', methods=['POST'])
 @jwt_required()
