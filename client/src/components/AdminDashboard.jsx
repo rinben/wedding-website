@@ -75,6 +75,34 @@ function AdminDashboard() {
     fetchData();
   }, [token]);
 
+  // New function to handle deletion of a registry item
+  const handleDeleteItem = async (itemId) => {
+    if (!window.confirm("Are you sure you want to delete this registry item?"))
+      return;
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/registry/${itemId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Refresh the registry list after deletion
+      await fetchRegistryItems();
+    } catch (error) {
+      console.error(`Failed to delete item:`, error);
+      setError(error);
+    }
+  };
+
   // Function to mark an item as fulfilled (admin side)
   const handleUpdateItemStatus = async (itemId, status) => {
     if (
@@ -613,6 +641,12 @@ function AdminDashboard() {
                       disabled={item.status === "AVAILABLE"}
                     >
                       Re-list
+                    </button>
+                    <button
+                      onClick={() => handleDeleteItem(item.id)}
+                      style={{ backgroundColor: "red" }}
+                    >
+                      Delete
                     </button>
                   </td>
                 </tr>
