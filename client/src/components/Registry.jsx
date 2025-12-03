@@ -1,5 +1,6 @@
 // src/components/Registry.jsx
 import React, { useState, useEffect } from "react";
+import ShippingAddressModal from "./ShippingAddressModal";
 import { API_BASE_URL } from "../config";
 import "./Registry.css";
 
@@ -41,6 +42,7 @@ function Registry() {
   const [error, setError] = useState(null);
   const [showClaimed, setShowClaimed] = useState(false);
   const [claimItemId, setClaimItemId] = useState(null);
+  const [showAddressItem, setShowAddressItem] = useState(null);
 
   // Function to fetch the physical items
   const fetchRegistryItems = async () => {
@@ -69,27 +71,6 @@ function Registry() {
     // 2. Fetch the data
     fetchRegistryItems();
   }, []); // Runs once on mount
-
-  // New function to handle the pre-purchase click (Claim logic step 1)
-  const handlePurchaseClick = (e, item) => {
-    e.preventDefault(); // Stop default navigation for now
-
-    const proceed = window.confirm(
-      `You are about to be redirected to the external retailer (${item.name}).\n\n` +
-        `To prevent duplicate gifts, please return to this page IMMEDIATELY after purchase to confirm the item has been claimed!`,
-    );
-
-    if (proceed) {
-      // 1. Save the item ID to local storage (for state persistence on accidental refresh)
-      localStorage.setItem("pendingRegistryClaim", item.id);
-
-      // 2. Open the link in a new tab (Fix for step 46)
-      window.open(item.link, "_blank");
-
-      // 3. GUARANTEED FIX: Immediately set state to show the modal card on the current screen
-      setClaimItemId(item.id);
-    }
-  };
 
   // New function to handle the claim confirmation when the user returns (Claim logic step 2)
   const handleClaimConfirmation = async (isConfirmed) => {
@@ -154,6 +135,23 @@ function Registry() {
     // If showClaimed is false, return only physical items that are NOT fulfilled
     return !isFulfilled;
   });
+
+  // New function to handle the purchase click (Replaces alert/confirm flow)
+  const handlePurchaseClick = (e, item) => {
+    e.preventDefault();
+
+    // 1. Save the item ID to local storage (Critical for anti-duplication)
+    localStorage.setItem("pendingRegistryClaim", item.id);
+
+    // 2. Set state to show the Shipping Address modal INSTEAD of redirecting immediately
+    // This is the custom card pop-up you requested.
+    setShowAddressItem(item);
+  };
+
+  // New function to handle closing the address modal and redirecting
+  const handleCloseAddressModal = (item) => {
+    setShowAddressItem(null); // Clear the modal state
+  };
 
   // --- RENDERING CHECKS (Must be placed before the final return) ---
   if (loading)
@@ -243,6 +241,18 @@ function Registry() {
           );
         })}
       </div>
+
+      {/* --- ADDRESS MODAL OVERLAY RENDER --- */}
+      {/* NOTE: We now wrap the ShippingAddressModal with a general overlay style */}
+      {showAddressItem && (
+        <div className="claim-confirmation-modal-overlay">
+          <ShippingAddressModal
+            onClose={() => handleCloseAddressModal(showAddressItem)}
+            itemName={showAddressItem.name}
+            itemLink={showAddressItem.link} // Pass the item link to the modal
+          />
+        </div>
+      )}
 
       {/* --- MODAL OVERLAY RENDER --- */}
       {claimItemId && (
