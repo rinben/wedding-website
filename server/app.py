@@ -130,26 +130,32 @@ def scrape_product_info(url):
     Returns:
         A dictionary: {"price": float, "image_url": str}
     """
-    import json # Ensure json is imported locally for schema processing
+    import json
+    import re
     try:
         headers = {
-            # Using a standard User-Agent is a necessary security measure to avoid being blocked by anti-bot systems
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
         response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status() # Raises an HTTPError if the status is 4xx or 5xx
+        response.raise_for_status()
 
         soup = BeautifulSoup(response.content, 'html.parser')
         price = None
         image_url = None
-        schema_script = soup.find('script', type='application/ld+json')
 
-        # --- 1. Attempt to Scrape Price and Image from Schema Markup (Best Source) ---
+        # --- Sub-Function to Clean and Secure URL ---
+        def clean_and_secure_url(raw_url):
+            if raw_url:
+                # CRITICAL FIX: Ensure the image URL is secure (HTTPS)
+                return raw_url.replace('http://', 'https://')
+            return None
+
+        # --- 1. Scrape from Schema Markup (Highest Priority) ---
+        schema_script = soup.find('script', type='application/ld+json')
         if schema_script:
             try:
                 data = json.loads(schema_script.string)
-                if isinstance(data, list):
-                    # Sometimes the schema is wrapped in a list, we try the first element
+                if isinstance(data, list) and data:
                     data = data[0]
 
                 # Price from Schema
@@ -161,24 +167,25 @@ def scrape_product_info(url):
 
                 # Image URL from Schema
                 if 'image' in data:
-                    # Schema image can be a string or a list of strings
+                    raw_img = None
                     if isinstance(data['image'], str):
-                         image_url = data['image']
+                         raw_img = data['image']
                     elif isinstance(data['image'], list) and data['image']:
-                        image_url = data['image'][0]
+                        raw_img = data['image'][0]
+
+                    if raw_img:
+                        image_url = clean_and_secure_url(raw_img)
 
             except (json.JSONDecodeError, ValueError, TypeError):
-                # We fail silently here to try less reliable scraping methods
                 pass
 
-        # --- 2. Fallback: Scrape Price and Image from OpenGraph Meta Tags (Standard Source) ---
+        # --- 2. Fallback: Scrape from OpenGraph Meta Tags ---
 
         # Price from OpenGraph (only if price hasn't been found)
         if price is None:
             og_price_tag = soup.find('meta', property='product:price:amount') or soup.find('meta', property='og:price:amount')
             if og_price_tag and og_price_tag.get('content'):
                 try:
-                    # Clean and convert the price string to a float
                     price = float(og_price_tag['content'].replace('$', '').replace(',', '').strip())
                 except ValueError:
                     pass
@@ -187,19 +194,25 @@ def scrape_product_info(url):
         if image_url is None:
             og_image_tag = soup.find('meta', property='og:image')
             if og_image_tag and og_image_tag.get('content'):
-                image_url = og_image_tag['content']
+                image_url = clean_and_secure_url(og_image_tag['content'])
 
-        # We skip the brittle "common price classes" check (point 1.3) as it can easily return bad data.
+        # --- 3. Final Fallback for Price (Common HTML Tags) ---
+        if price is None:
+            # Looks for any text that looks like a price ($xx.xx)
+            price_match = re.search(r'\$(\d+[\.,]\d{2})', response.text)
+            if price_match:
+                try:
+                    # Clean and set price
+                    price = float(price_match.group(1).replace(',', '').strip())
+                except ValueError:
+                    pass
 
-        # Return both pieces of information, even if one or both are None
         return {"price": price, "image_url": image_url}
 
     except requests.exceptions.RequestException as e:
-        # Catch network or timeout errors
         print(f"Error fetching URL {url}: {e}")
         return {"price": None, "image_url": None}
     except Exception as e:
-        # Catch any other unexpected Python errors during processing
         print(f"Error during scraping process from {url}: {e}")
         return {"price": None, "image_url": None}
 
