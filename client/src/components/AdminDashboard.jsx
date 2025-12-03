@@ -684,7 +684,7 @@ function AdminDashboard() {
           <table className="guest-list-table">
             <thead>
               <tr>
-                <th>Image</th>
+                <th>Image URL</th>
                 <th>Item Name</th>
                 <th>Price</th>
                 <th>Needed</th>
@@ -698,19 +698,18 @@ function AdminDashboard() {
                 <tr key={item.id}>
                   <td>
                     {item.image_url ? (
-                      <img
-                        src={item.image_url}
-                        alt={item.name}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          objectFit: "cover",
-                        }}
-                      />
+                      <a
+                        href={item.image_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Image URL
+                      </a>
                     ) : (
-                      "No Image"
+                      "No URL"
                     )}
-                  </td>
+                  </td>{" "}
+                  {/* <-- UPDATED CELL CONTENT */}
                   <td>
                     <a
                       href={item.link}

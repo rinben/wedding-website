@@ -120,6 +120,7 @@ def serialize_registry_item(item):
         'quantityClaimed': item.quantity_claimed,
         'status': item.status,
         'lastClaimed': item.last_claimed.isoformat() if item.last_claimed else None,
+        'image_url': item.image_url,
         # We don't need to serialize the full ClaimLog here, just the item data.
     }
 
