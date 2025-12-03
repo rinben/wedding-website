@@ -677,5 +677,19 @@ def delete_registry_item(item_id):
         print(f"Error deleting registry item: {e}")
         return jsonify(message="An error occurred while deleting the item"), 500
 
+@app.route('/api/migrate_db_once', methods=['POST'])
+@cross_origin()
+def migrate_db_once():
+    # !!! WARNING: DELETE THIS ROUTE IMMEDIATELY AFTER USE !!!
+    try:
+        from flask_migrate import upgrade
+        with app.app_context():
+            upgrade()
+        return jsonify({"msg": "Database migration successful! Tables are now created."}), 200
+    except Exception as e:
+        # We must explicitly rollback the session on error
+        db.session.rollback()
+        return jsonify({"msg": f"Migration failed: {e.__class__.__name__}: {str(e)}"}), 500
+
 if __name__ == '__main__':
     app.run(debug=(not is_production))
