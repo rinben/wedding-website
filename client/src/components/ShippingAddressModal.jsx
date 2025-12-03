@@ -1,8 +1,7 @@
 // client/src/components/ShippingAddressModal.jsx
 import React from "react";
 
-// NOTE: Address is hardcoded here for maximum security, as retrieving it
-// via a public API endpoint would expose private information.
+// NOTE: Hardcoded the address here for maximum security.
 const SHIPPING_ADDRESS_DETAILS = {
   name: "Sara & Ben Kolipinski",
   street: "800 Loretta St.",
@@ -37,35 +36,34 @@ function ShippingAddressModal({ onClose, itemName, itemLink }) {
 
   // The 'OK' button action: close the modal AND redirect to the vendor site
   const handleRedirect = () => {
-    onClose(); // Close the modal first
-    window.open(itemLink, "_blank"); // Open the vendor site in a new tab
+    onClose(); // 1. Close the modal
+    window.open(itemLink, "_blank"); // 2. Open the vendor site in a new tab
+  };
+
+  // The 'Cancel Purchase' button action
+  const handleCancel = () => {
+    onClose(); // Just closes the modal, user stays on the registry page
   };
 
   return (
+    // The outer div uses the existing overlay class (from Registry.jsx)
     <div className="shipping-modal-overlay">
-      <div className="shipping-modal-card">
+      {/* Inner div uses the card class for styling (This is the fix!) */}
+      <div className="claim-confirmation-card shipping-modal-card">
         <h2>
-          <span style={{ color: "red", fontWeight: "bold" }}>Important!</span>
+          <span style={{ color: "var(--color-secondary)" }}>Important!</span>
         </h2>
-        <p>You are purchasing the **{itemName}**.</p>
+        <p>You are initiating a purchase for the **{itemName}**.</p>
 
-        <p>
-          Since our wedding is in **Canada**, transporting gifts across the
-          border is difficult. We kindly ask that all gifts be **shipped
-          directly to our US home address**.
+        <p style={{ marginTop: "1rem" }}>
+          Due to our wedding being held in Canada, shipping gifts across the
+          border is difficult. We strongly urge you to ship your gift directly
+          to our **US home address**.
         </p>
 
         <h3>Our Shipping Address:</h3>
-        <div
-          className="address-display"
-          style={{
-            border: "1px dashed #ccc",
-            padding: "1rem",
-            marginBottom: "1rem",
-            textAlign: "left",
-          }}
-        >
-          {/* Display address using <pre> to maintain formatting for easy manual copy */}
+
+        <div className="address-display">
           <pre>{formattedAddress}</pre>
         </div>
 
@@ -78,21 +76,29 @@ function ShippingAddressModal({ onClose, itemName, itemLink }) {
         </button>
 
         <p
-          style={{ marginTop: "1.5rem", fontWeight: "bold", color: "darkred" }}
+          style={{
+            marginTop: "2rem",
+            marginBottom: "1rem",
+            fontWeight: "bold",
+            color: "var(--color-secondary)",
+          }}
         >
-          Don't forget to return to this page to claim the item after
-          purchasing!
+          After purchasing, you must return to this site to claim the item!
         </p>
 
-        <div className="modal-buttons" style={{ marginTop: "1.5rem" }}>
-          <button onClick={handleRedirect} className="registry-button">
+        <div className="modal-buttons">
+          <button
+            onClick={handleRedirect}
+            className="registry-button"
+            style={{ backgroundColor: "var(--color-accent-1)" }}
+          >
             OK, Go To Store Site
           </button>
           <button
-            onClick={onClose}
+            onClick={handleCancel}
             style={{ backgroundColor: "#ccc", color: "#333" }}
           >
-            Cancel Purchase
+            Cancel
           </button>
         </div>
       </div>
