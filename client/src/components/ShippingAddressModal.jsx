@@ -11,7 +11,7 @@ const SHIPPING_ADDRESS_DETAILS = {
   country: "USA",
 };
 
-function ShippingAddressModal({ onClose, itemName, itemLink }) {
+function ShippingAddressModal({ onCancel, onRedirect, itemName, itemLink }) {
   // Consolidate granular details into a single formatted string for copying
   const formattedAddress = `
         ${SHIPPING_ADDRESS_DETAILS.name}
