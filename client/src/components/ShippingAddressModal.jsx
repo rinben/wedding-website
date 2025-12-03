@@ -46,9 +46,7 @@ function ShippingAddressModal({ onClose, itemName, itemLink }) {
   };
 
   return (
-    // The outer div uses the existing overlay class (from Registry.jsx)
     <div className="shipping-modal-overlay">
-      {/* Inner div uses the card class for styling (This is the fix!) */}
       <div className="claim-confirmation-card shipping-modal-card">
         <h2>
           <span style={{ color: "var(--color-secondary)" }}>Important!</span>
@@ -86,16 +84,18 @@ function ShippingAddressModal({ onClose, itemName, itemLink }) {
           After purchasing, you must return to this site to claim the item!
         </p>
 
-        <div className="modal-buttons">
+        <div className="modal-buttons" style={{ marginTop: "1.5rem" }}>
           <button
-            onClick={handleRedirect}
+            // Attach the new onRedirect handler here
+            onClick={onRedirect}
             className="registry-button"
             style={{ backgroundColor: "var(--color-accent-1)" }}
           >
-            OK, Go To Store Site
+            OK
           </button>
           <button
-            onClick={handleCancel}
+            // Attach the new onCancel handler here
+            onClick={onCancel}
             style={{ backgroundColor: "#ccc", color: "#333" }}
           >
             Cancel
