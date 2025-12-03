@@ -193,7 +193,8 @@ function Registry() {
               : "View & Purchase";
 
           // Image Path logic: Use item's path or a generic placeholder
-          const imageSrc = item.imagePath || "/registry-default.jpg";
+          const imageSrc =
+            item.image_url || item.imagePath || "/registry-default.jpg";
 
           return (
             <div
@@ -201,10 +202,7 @@ function Registry() {
               className={`registry-card ${isFulfilled ? "claimed" : ""}`}
             >
               {/* Image - Prioritize dynamic URL from database */}
-              <img
-                src={item.image_url || imageSrc} // item.image_url is the new scraped link
-                alt={item.name}
-              />
+              <img src={imageSrc} alt={item.name} />
               <h3>{item.name}</h3>
 
               {/* DESCRIPTION & DISPLAY LOGIC: Checks isFund to hide Price/Quantity */}
