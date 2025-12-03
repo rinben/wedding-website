@@ -85,6 +85,9 @@ class RegistryItem(db.Model):
     # Audit trail for when the item was last claimed
     last_claimed = db.Column(db.DateTime)
 
+    # Store URL of image
+    image_url = db.Column(db.String(500), nullable=True)
+
 # New Model for Security/Audit Log of Claims
 class ClaimLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -120,58 +123,85 @@ def serialize_registry_item(item):
         # We don't need to serialize the full ClaimLog here, just the item data.
     }
 
-def scrape_price_from_url(url):
-    """Attempts to scrape a price from a given URL."""
+def scrape_product_info(url):
+    """
+    Attempts to scrape the price and the main product image URL from a given external URL.
+
+    Returns:
+        A dictionary: {"price": float, "image_url": str}
+    """
+    import json # Ensure json is imported locally for schema processing
     try:
         headers = {
+            # Using a standard User-Agent is a necessary security measure to avoid being blocked by anti-bot systems
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
         response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
+        response.raise_for_status() # Raises an HTTPError if the status is 4xx or 5xx
 
         soup = BeautifulSoup(response.content, 'html.parser')
-
-        # **CRITICAL:** Web scraping requires site-specific selectors.
-        # We will use general selectors common on e-commerce sites (OpenGraph, Schema Markup, etc.).
-
-        # 1. Look for Schema Markup (JSON-LD)
+        price = None
+        image_url = None
         schema_script = soup.find('script', type='application/ld+json')
+
+        # --- 1. Attempt to Scrape Price and Image from Schema Markup (Best Source) ---
         if schema_script:
-            import json
             try:
                 data = json.loads(schema_script.string)
                 if isinstance(data, list):
-                    data = data[0] # Try the first element if it's a list
+                    # Sometimes the schema is wrapped in a list, we try the first element
+                    data = data[0]
 
-                # Look for properties like 'offers' or 'price'
-                if 'offers' in data and 'price' in data['offers']:
-                    return float(data['offers']['price'])
-                if 'price' in data:
-                    return float(data['price'])
-            except json.JSONDecodeError:
-                pass # Ignore if JSON is invalid
+                # Price from Schema
+                if 'offers' in data:
+                    if 'price' in data['offers']:
+                        price = float(data['offers']['price'])
+                elif 'price' in data:
+                    price = float(data['price'])
 
-        # 2. Look for OpenGraph Meta Tags (for general product info)
-        og_price_tag = soup.find('meta', property='product:price:amount') or soup.find('meta', property='og:price:amount')
-        if og_price_tag and og_price_tag.get('content'):
-            return float(og_price_tag['content'].replace('$', '').replace(',', ''))
+                # Image URL from Schema
+                if 'image' in data:
+                    # Schema image can be a string or a list of strings
+                    if isinstance(data['image'], str):
+                         image_url = data['image']
+                    elif isinstance(data['image'], list) and data['image']:
+                        image_url = data['image'][0]
 
-        # 3. Look for common price classes (Last resort, highly site-dependent)
-        price_elements = soup.find_all(lambda tag: tag.name in ['span', 'div'] and ('price' in tag.get('class', []) or 'sale' in tag.get('class', [])))
-        for elem in price_elements:
-            text = elem.get_text(strip=True)
-            if '$' in text:
-                # Clean and return the first reasonable price found
-                return float(text.replace('$', '').replace(',', '').strip())
+            except (json.JSONDecodeError, ValueError, TypeError):
+                # We fail silently here to try less reliable scraping methods
+                pass
 
-        return None # Price not found
+        # --- 2. Fallback: Scrape Price and Image from OpenGraph Meta Tags (Standard Source) ---
+
+        # Price from OpenGraph (only if price hasn't been found)
+        if price is None:
+            og_price_tag = soup.find('meta', property='product:price:amount') or soup.find('meta', property='og:price:amount')
+            if og_price_tag and og_price_tag.get('content'):
+                try:
+                    # Clean and convert the price string to a float
+                    price = float(og_price_tag['content'].replace('$', '').replace(',', '').strip())
+                except ValueError:
+                    pass
+
+        # Image URL from OpenGraph (only if image_url hasn't been found)
+        if image_url is None:
+            og_image_tag = soup.find('meta', property='og:image')
+            if og_image_tag and og_image_tag.get('content'):
+                image_url = og_image_tag['content']
+
+        # We skip the brittle "common price classes" check (point 1.3) as it can easily return bad data.
+
+        # Return both pieces of information, even if one or both are None
+        return {"price": price, "image_url": image_url}
 
     except requests.exceptions.RequestException as e:
+        # Catch network or timeout errors
         print(f"Error fetching URL {url}: {e}")
-        return None
+        return {"price": None, "image_url": None}
     except Exception as e:
-        print(f"Error scraping price from {url}: {e}")
-        return None
+        # Catch any other unexpected Python errors during processing
+        print(f"Error during scraping process from {url}: {e}")
+        return {"price": None, "image_url": None}
 
 
 # --- API ROUTES ---
@@ -545,18 +575,23 @@ def claim_registry_item(item_id):
 @jwt_required()
 @cross_origin()
 def admin_price_lookup():
-    """Securely scrapes the price from a given URL."""
+    """Securely scrapes the price AND image URL from a given URL."""
     data = request.json
     url = data.get('url')
     if not url:
         return jsonify({"msg": "URL is required"}), 400
 
-    price = scrape_price_from_url(url)
+    # Use the combined scraping function
+    info = scrape_product_info(url)
 
-    if price is not None:
-        return jsonify({"price": price, "msg": f"Price found: ${price}"}), 200
+    if info['price'] is not None or info['image_url'] is not None:
+        return jsonify({
+            "price": info['price'],
+            "image_url": info['image_url'], # <--- NEW FIELD
+            "msg": f"Price found: ${info['price'] or 'N/A'}. Image URL scraped."
+        }), 200
     else:
-        return jsonify({"msg": "Could not determine price from the provided URL. Manual entry required."}), 404
+        return jsonify({"msg": "Could not determine price or image from the provided URL. Manual entry required."}), 404
 
 @app.route('/api/admin/registry', methods=['POST'])
 @jwt_required()
