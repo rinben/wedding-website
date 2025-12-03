@@ -677,6 +677,34 @@ def delete_registry_item(item_id):
         print(f"Error deleting registry item: {e}")
         return jsonify(message="An error occurred while deleting the item"), 500
 
+@app.route('/api/admin/registry/<int:item_id>', methods=['PUT'])
+@jwt_required()
+@cross_origin()
+def update_registry_item(item_id):
+    """Allows admin to update all fields of a registry item."""
+    try:
+        item = db.session.get(RegistryItem, item_id)
+        if not item:
+            return jsonify(message="Registry item not found"), 404
+
+        data = request.json
+
+        item.name = data.get('name', item.name)
+        item.link = data.get('link', item.link)
+        item.image_url = data.get('image_url', item.image_url)
+        item.price = data.get('price', item.price)
+        item.quantity_needed = data.get('quantityNeeded', item.quantity_needed)
+        item.quantity_claimed = data.get('quantityClaimed', item.quantity_claimed)
+        item.status = data.get('status', item.status)
+
+        db.session.commit()
+
+        return jsonify(serialize_registry_item(item)), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating registry item {item_id}: {e}")
+        return jsonify(message="An error occurred while updating the registry item"), 500
 
 if __name__ == '__main__':
     app.run(debug=(not is_production))

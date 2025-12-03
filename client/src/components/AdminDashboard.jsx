@@ -11,6 +11,7 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentView, setCurrentView] = useState("guests"); // New state for view control
+  const [editingRegistryItem, setEditingRegistryItem] = useState(null);
 
   const [form, setForm] = useState({
     first_name: "",
@@ -74,6 +75,92 @@ function AdminDashboard() {
   useEffect(() => {
     fetchData();
   }, [token]);
+
+  const handleEditItemLookup = async () => {
+    if (!editingRegistryItem || !editingRegistryItem.link) return;
+
+    // Use the existing token and API base URL
+    const token = localStorage.getItem("access_token");
+    const url = editingRegistryItem.link;
+
+    // Minimal error/status handling for the lookup during edit
+    console.log(`Looking up info for: ${url}`);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/price-lookup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(
+          `Lookup successful. Price: $${result.price || "N/A"}. Image URL found.`,
+        );
+        // Update the local editing state immediately
+        setEditingRegistryItem((prev) => ({
+          ...prev,
+          price: result.price || prev.price,
+          image_url: result.image_url || prev.image_url,
+        }));
+      } else {
+        alert(result.msg || "Lookup failed.");
+      }
+    } catch (error) {
+      console.error("Lookup error during edit:", error);
+      alert("Server error during lookup.");
+    }
+  };
+
+  const handleEditRegistry = (item) => {
+    // Save the entire item object into the editing state
+    setEditingRegistryItem({ ...item });
+  };
+
+  const handleEditRegistryChange = (e) => {
+    const { name, value, type } = e.target;
+    setEditingRegistryItem((prevItem) => ({
+      ...prevItem,
+      [name]: type === "number" ? parseFloat(value) : value,
+    }));
+  };
+
+  const handleEditRegistrySave = async () => {
+    if (!editingRegistryItem) return;
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/registry/${editingRegistryItem.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(editingRegistryItem),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      setEditingRegistryItem(null); // Close the form
+      await fetchRegistryItems(); // Refresh the list
+    } catch (error) {
+      console.error("Failed to save registry changes:", error);
+      setError(error);
+    }
+  };
+
+  const handleEditRegistryCancel = () => {
+    setEditingRegistryItem(null);
+  };
 
   // New function to handle deletion of a registry item
   const handleDeleteItem = async (itemId) => {
@@ -642,11 +729,13 @@ function AdminDashboard() {
                     </span>
                   </td>
                   <td>
+                    <button onClick={() => handleEditRegistry(item)}>
+                      Edit
+                    </button>
                     <button
                       onClick={() =>
                         handleUpdateItemStatus(item.id, "FULFILLED")
                       }
-                      disabled={item.status === "FULFILLED"}
                     >
                       Fulfill
                     </button>
@@ -654,7 +743,6 @@ function AdminDashboard() {
                       onClick={() =>
                         handleUpdateItemStatus(item.id, "AVAILABLE")
                       }
-                      disabled={item.status === "AVAILABLE"}
                     >
                       Re-list
                     </button>
@@ -669,6 +757,73 @@ function AdminDashboard() {
               ))}
             </tbody>
           </table>
+
+          {/* --- REGISTRY EDIT FORM --- */}
+          {editingRegistryItem && (
+            <div className="edit-guest-form-container">
+              <h3>Edit Item: {editingRegistryItem.name}</h3>
+              <form className="edit-guest-form">
+                <input
+                  name="name"
+                  value={editingRegistryItem.name}
+                  onChange={handleEditRegistryChange}
+                  placeholder="Item Name"
+                />
+                <input
+                  name="link"
+                  value={editingRegistryItem.link}
+                  onChange={handleEditRegistryChange}
+                  placeholder="Product URL"
+                />
+                <button type="button" onClick={handleEditItemLookup}>
+                  Lookup Info
+                </button>
+                <input
+                  name="image_url"
+                  value={editingRegistryItem.image_url}
+                  onChange={handleEditRegistryChange}
+                  placeholder="Image URL (Scraped)"
+                />
+                <input
+                  name="price"
+                  type="number"
+                  step="0.01"
+                  value={editingRegistryItem.price}
+                  onChange={handleEditRegistryChange}
+                  placeholder="Price"
+                />
+                <input
+                  name="quantityNeeded"
+                  type="number"
+                  min="1"
+                  value={editingRegistryItem.quantityNeeded}
+                  onChange={handleEditRegistryChange}
+                  placeholder="Quantity Needed"
+                />
+                <div className="edit-form-buttons">
+                  <button type="button" onClick={handleEditRegistrySave}>
+                    Save Changes
+                  </button>
+                  <button type="button" onClick={handleEditRegistryCancel}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+              {/* Display Scraped Image Thumbnail (Optional) */}
+              {editingRegistryItem.image_url && (
+                <img
+                  src={editingRegistryItem.image_url}
+                  alt="Thumbnail"
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    objectFit: "cover",
+                    marginTop: "10px",
+                  }}
+                />
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
