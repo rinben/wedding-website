@@ -597,6 +597,7 @@ function AdminDashboard() {
           <table className="guest-list-table">
             <thead>
               <tr>
+                <th>Image</th>
                 <th>Item Name</th>
                 <th>Price</th>
                 <th>Needed</th>
@@ -608,6 +609,21 @@ function AdminDashboard() {
             <tbody>
               {registryItems.map((item) => (
                 <tr key={item.id}>
+                  <td>
+                    {item.image_url ? (
+                      <img
+                        src={item.image_url}
+                        alt={item.name}
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      "No Image"
+                    )}
+                  </td>
                   <td>
                     <a
                       href={item.link}

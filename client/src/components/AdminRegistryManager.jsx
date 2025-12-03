@@ -9,6 +9,7 @@ function AdminRegistryManager({ onRegistryUpdate }) {
     link: "",
     price: "",
     quantityNeeded: 1,
+    image_url: "", // <-- NEW STATE FIELD
   });
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,7 +30,7 @@ function AdminRegistryManager({ onRegistryUpdate }) {
       return;
     }
     setLoading(true);
-    setStatus("Looking up price...");
+    setStatus("Looking up product info...");
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/admin/price-lookup`, {
@@ -44,19 +45,22 @@ function AdminRegistryManager({ onRegistryUpdate }) {
       const result = await response.json();
 
       if (response.ok) {
-        // Price is returned as a number, format it for display
+        // --- NEW LOGIC: SETS BOTH PRICE AND IMAGE URL ---
         setForm((prev) => ({
           ...prev,
           price: result.price ? result.price.toFixed(2) : "",
+          image_url: result.image_url || "", // Set the scraped image URL
         }));
         setStatus(result.msg);
       } else {
-        setStatus(result.msg || "Price lookup failed. Please enter manually.");
-        setForm((prev) => ({ ...prev, price: "" }));
+        setStatus(
+          result.msg || "Product lookup failed. Please enter info manually.",
+        );
+        setForm((prev) => ({ ...prev, price: "", image_url: "" }));
       }
     } catch (error) {
       console.error("Lookup error:", error);
-      setStatus("Server error during price lookup.");
+      setStatus("Server error during product lookup.");
     } finally {
       setLoading(false);
     }
@@ -82,8 +86,9 @@ function AdminRegistryManager({ onRegistryUpdate }) {
         body: JSON.stringify({
           name: form.name,
           link: form.link,
-          price: parseFloat(form.price), // Ensure price is float
+          price: parseFloat(form.price),
           quantityNeeded: form.quantityNeeded,
+          image_url: form.image_url, // <-- NEW PAYLOAD FIELD
         }),
       });
 
@@ -91,7 +96,13 @@ function AdminRegistryManager({ onRegistryUpdate }) {
 
       if (response.ok) {
         alert(`Success: ${result.name} added to registry.`);
-        setForm({ name: "", link: "", price: "", quantityNeeded: 1 }); // Reset form
+        setForm({
+          name: "",
+          link: "",
+          price: "",
+          quantityNeeded: 1,
+          image_url: "",
+        }); // Reset form
         onRegistryUpdate(); // Callback to refresh the full list in the dashboard
       } else {
         setStatus(result.msg || "Failed to add item to registry.");
@@ -114,7 +125,7 @@ function AdminRegistryManager({ onRegistryUpdate }) {
           name="name"
           value={form.name}
           onChange={handleChange}
-          placeholder="Item Name (e.g., Le Creuset Dutch Oven)"
+          placeholder="Item Name"
           required
         />
         <div className="link-group">
@@ -130,7 +141,7 @@ function AdminRegistryManager({ onRegistryUpdate }) {
             onClick={handlePriceLookup}
             disabled={loading || !form.link}
           >
-            {loading ? "Searching..." : "Lookup Price"}
+            {loading ? "Searching..." : "Lookup Info"}
           </button>
         </div>
         <input
@@ -142,6 +153,13 @@ function AdminRegistryManager({ onRegistryUpdate }) {
           placeholder="Price (e.g., 350.00)"
           required
         />
+        <input
+          name="image_url"
+          value={form.image_url}
+          onChange={handleChange}
+          placeholder="Image URL (Scraped automatically)"
+        />{" "}
+        {/* <-- NEW INPUT FIELD */}
         <input
           name="quantityNeeded"
           type="number"

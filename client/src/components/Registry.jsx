@@ -200,8 +200,11 @@ function Registry() {
               key={item.id}
               className={`registry-card ${isFulfilled ? "claimed" : ""}`}
             >
-              {/* Image */}
-              <img src={imageSrc} alt={item.name} />
+              {/* Image - Prioritize dynamic URL from database */}
+              <img
+                src={item.image_url || imageSrc} // item.image_url is the new scraped link
+                alt={item.name}
+              />
               <h3>{item.name}</h3>
 
               {/* DESCRIPTION & DISPLAY LOGIC: Checks isFund to hide Price/Quantity */}
