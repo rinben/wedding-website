@@ -87,16 +87,16 @@
 
 /* 1. Overlay Backdrop */
 .claim-confirmation-modal-overlay {
-  position: fixed; /* Fixes it to the viewport */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black background */
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 100; /* Ensures it sits on top of everything else */
+  z-index: 100;
 }
 
 /* 2. Base Card Styling (Used by BOTH modals) */
@@ -106,14 +106,14 @@
   border-radius: 8px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
   max-width: 400px;
-  width: 90%; /* Added for better mobile responsiveness */
+  width: 90%;
   text-align: center;
   color: var(--color-text);
 }
 
 /* 3. Address Modal Specific Sizing */
 .shipping-modal-card {
-  max-width: 500px; /* Allows the address modal to be slightly wider */
+  max-width: 500px;
 }
 
 /* 4. Address Display Area */
@@ -127,7 +127,7 @@
 }
 .address-display pre {
   margin: 0;
-  white-space: pre-wrap; /* Ensures long addresses wrap correctly */
+  white-space: pre-wrap;
   font-family: var(--font-default);
   font-size: 0.9rem;
   color: var(--color-text);
@@ -145,10 +145,25 @@
 }
 
 .copy-button {
-  /* Uses the color for your lime/yellow accent for visibility */
   background-color: var(--color-highlight) !important;
   color: var(--color-text) !important;
 }
 .copy-button:hover {
   background-color: #a4a351 !important;
+}
+
+/* --- MOBILE OPTIMIZATION FIX (Step 62) --- */
+@media (max-width: 600px) {
+  .claim-confirmation-card,
+  .shipping-modal-card {
+    /* Set to full width and height to look like a dedicated page/overlay */
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 3rem 1rem; /* Adjust padding for better spacing */
+    border-radius: 0; /* Remove rounded corners */
+    box-shadow: none; /* Remove floating shadow */
+    overflow-y: auto; /* Allows scrolling if content overflows */
+  }
 }
