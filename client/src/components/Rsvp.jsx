@@ -61,9 +61,18 @@ function Rsvp() {
 
   const handleRsvpChange = (guestId, field, value) => {
     setPartyGuests((prevGuests) =>
-      prevGuests.map((guest) =>
-        guest.id === guestId ? { ...guest, [field]: value === "true" } : guest,
-      ),
+      prevGuests.map((guest) => {
+        let finalValue = value;
+
+        // CRITICAL CHECK: ONLY convert to boolean if the field is 'attending'.
+        if (field === "attending") {
+          // This correctly handles the "true" or "false" string values from radio buttons
+          finalValue = value === "true";
+        }
+        // If the field is "dietary_restrictions", finalValue remains the text string 'value'.
+
+        return guest.id === guestId ? { ...guest, [field]: finalValue } : guest;
+      }),
     );
   };
 
