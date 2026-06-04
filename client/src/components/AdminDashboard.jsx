@@ -18,6 +18,7 @@ function AdminDashboard() {
     last_name: "",
     party_id: "",
     attending: false,
+    welcome_party: false,
     dietary_restrictions: "",
   });
   const [editingGuest, setEditingGuest] = useState(null);
@@ -552,6 +553,15 @@ function AdminDashboard() {
               />{" "}
               Attending
             </label>
+            <label>
+              <input
+                type="checkbox"
+                name="welcome_party"
+                checked={form.welcome_party}
+                onChange={handleAddChange}
+              />{" "}
+              Welcome Party
+            </label>
             <input
               name="dietary_restrictions"
               value={form.dietary_restrictions}
@@ -593,6 +603,11 @@ function AdminDashboard() {
                   {sortKey === "attending" &&
                     (sortDirection === "asc" ? "▲" : "▼")}
                 </th>
+                <th onClick={() => handleSort("welcome_party")}>
+                  Welcome Party{" "}
+                  {sortKey === "welcome_party" &&
+                    (sortDirection === "asc" ? "▲" : "▼")}
+                </th>
                 <th>Dietary Restrictions</th>
                 <th>Actions</th>
               </tr>
@@ -612,6 +627,7 @@ function AdminDashboard() {
                   </td>
                   <td>{guest.party_id}</td>
                   <td>{guest.attending ? "Yes" : "No"}</td>
+                  <td>{guest.welcome_party ? "Yes" : "No"}</td>
                   <td>{guest.dietary_restrictions || "None"}</td>
                   <td>
                     <button onClick={() => handleEdit(guest)}>Edit</button>
@@ -656,6 +672,15 @@ function AdminDashboard() {
                     onChange={handleEditChange}
                   />{" "}
                   Attending
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="welcome_party"
+                    checked={editingGuest.welcome_party || false}
+                    onChange={handleEditChange}
+                  />{" "}
+                  Welcome Party
                 </label>
                 <input
                   name="dietary_restrictions"
