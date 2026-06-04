@@ -30,12 +30,12 @@ function Itinerary() {
           <div className="itinerary-timeline-dot"></div>
           <div className="itinerary-timeline-date">
             <h3>Friday Sept. 11th 2026</h3>
-            <p>7:00 PM</p>
+            <p>6:00 PM</p>
           </div>
           <div className="itinerary-content">
-            <h4>Welcome Party</h4>
+            <h4>Optional Welcome Party</h4>
             <p>
-              <b>Location:</b> Gather Tasting Room
+              <b>Location:</b> Bay Beach Club
             </p>
           </div>
         </div>
@@ -46,13 +46,10 @@ function Itinerary() {
           <div className="itinerary-timeline-dot"></div>
           <div className="itinerary-timeline-date">
             <h3>Saturday Sept. 12th 2026</h3>
-            <p>3:00 PM</p>
+            <p>4:00 PM</p>
           </div>
           <div className="itinerary-content">
             <h4>Wedding Ceremony</h4>
-            <p>
-              <b>INVITED GUESTS ONLY</b>
-            </p>
             <p>
               <b>Location:</b> Bay Beach Club
             </p>
@@ -65,7 +62,7 @@ function Itinerary() {
           <div className="itinerary-timeline-dot"></div>
           <div className="itinerary-timeline-date">
             <h3>Saturday Sept. 12th 2026</h3>
-            <p>5:00 PM</p>
+            <p>Following Ceremony</p>
           </div>
           <div className="itinerary-content">
             <h4>Cocktail Hour</h4>
@@ -81,7 +78,7 @@ function Itinerary() {
           <div className="itinerary-timeline-dot"></div>
           <div className="itinerary-timeline-date">
             <h3>Saturday Sept. 12th 2026</h3>
-            <p>6:00 PM</p>
+            <p>5:30 PM - 10:00 PM</p>
           </div>
           <div className="itinerary-content">
             <h4>Dinner and Reception</h4>
