@@ -658,22 +658,5 @@ def update_registry_item(item_id):
         ), 500
 
 
-@app.route("/api/migrate-db")
-@cross_origin()
-def temporary_db_migration():
-    """Temporary route to add the welcome_party column to the Vercel Postgres DB."""
-    try:
-        db.session.execute(
-            text("ALTER TABLE guest ADD COLUMN welcome_party BOOLEAN DEFAULT FALSE;")
-        )
-        db.session.commit()
-        return jsonify(
-            message="Database updated successfully! The welcome_party column was added."
-        ), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify(error=f"Migration failed: {str(e)}"), 500
-
-
 if __name__ == "__main__":
     app.run(debug=(not is_production))
