@@ -10,6 +10,7 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
 from datetime import timedelta, datetime
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import text
 from werkzeug.datastructures import FileStorage
 
 import io
@@ -68,6 +69,7 @@ class Guest(db.Model):
     last_name = db.Column(db.String(100), nullable=False)
     party_id = db.Column(db.String(100), nullable=False)
     attending = db.Column(db.Boolean, default=False)
+    welcome_party = db.Column(db.Boolean, default=False)
     dietary_restrictions = db.Column(db.Text, default='')
 
 # New Model for Registry Items
@@ -106,6 +108,7 @@ def serialize_guest(guest):
         'last_name': guest.last_name,
         'party_id': guest.party_id,
         'attending': guest.attending,
+        'welcome_party': getattr(guest, 'welcome_party', False),
         'dietary_restrictions': guest.dietary_restrictions,
     }
 
@@ -296,6 +299,13 @@ def update_guest(guest_id):
             else:
                 guest.attending = bool(attending_data)
 
+        welcome_data = data.get('welcome_party')
+        if welcome_data is not None:
+            if isinstance(welcome_data, str):
+                guest.welcome_party = welcome_data.lower() == 'true'
+            else:
+                guest.welcome_party = bool(welcome_data)
+
         guest.dietary_restrictions = data.get('dietary_restrictions', guest.dietary_restrictions)
 
         db.session.commit()
@@ -329,6 +339,7 @@ def add_guest():
         last_name=data.get('last_name'),
         party_id=data.get('party_id'),
         attending=data.get('attending', False),
+        welcome_party=data.get('welcome_party', False),
         dietary_restrictions=data.get('dietary_restrictions', '')
     )
     db.session.add(new_guest)
@@ -436,7 +447,7 @@ def export_guests():
     writer = csv.writer(output)
 
     # Write header
-    writer.writerow(['ID', 'First Name', 'Last Name', 'Party ID', 'Attending', 'Dietary Restrictions'])
+    writer.writerow(['ID', 'First Name', 'Last Name', 'Party ID', 'Attending', 'Welcome Party', 'Dietary Restrictions'])
 
     # Write data
     for guest in guests:
@@ -446,6 +457,7 @@ def export_guests():
             guest.last_name,
             guest.party_id,
             'Yes' if guest.attending else 'No',
+            'Yes' if getattr(guest, 'welcome_party', False) else 'No',
             guest.dietary_restrictions
         ])
 
@@ -474,6 +486,13 @@ def public_rsvp_update(guest_id):
             guest.attending = attending_data.lower() == 'true'
         else:
             guest.attending = bool(attending_data)
+
+    welcome_data = data.get('welcome_party')
+        if welcome_data is not None:
+            if isinstance(welcome_data, str):
+                guest.welcome_party = welcome_data.lower() == 'true'
+            else:
+                guest.welcome_party = bool(welcome_data)
 
     guest.dietary_restrictions = data.get('dietary_restrictions', guest.dietary_restrictions)
 
@@ -512,13 +531,15 @@ def import_guests():
                 last_name = row[2]
                 party_id = row[3]
                 attending = row[4].lower() == 'yes' if len(row) > 4 and row[4] else False
-                dietary_restrictions = row[5] if len(row) > 5 and row[5] else ''
+                welcome_party = row[5].lower() == 'yes' if len(row) > 5 and row[5] else False
+                dietary_restrictions = row[6] if len(row) > 6 and row[6] else ''
 
                 new_guest = Guest(
                     first_name=first_name,
                     last_name=last_name,
                     party_id=party_id,
                     attending=attending,
+                    welcome_party=welcome_party,
                     dietary_restrictions=dietary_restrictions
                 )
                 db.session.add(new_guest)
@@ -719,6 +740,20 @@ def update_registry_item(item_id):
         db.session.rollback()
         print(f"Error updating registry item {item_id}: {e}")
         return jsonify(message="An error occurred while updating the registry item"), 500
+
+@app.route('/api/migrate-db')
+@cross_origin()
+def temporary_db_migration():
+    """Temporary route to add the welcome_party column to the Vercel Postgres DB."""
+    try:
+        # Executes raw SQL to add the new column with a default value of False
+        db.session.execute(text('ALTER TABLE guest ADD COLUMN welcome_party BOOLEAN DEFAULT FALSE;'))
+        db.session.commit()
+        return jsonify(message="Database updated successfully! The welcome_party column was added."), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(error=f"Migration failed: {str(e)}"), 500
+
 
 if __name__ == '__main__':
     app.run(debug=(not is_production))

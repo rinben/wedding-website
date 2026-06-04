@@ -64,12 +64,10 @@ function Rsvp() {
       prevGuests.map((guest) => {
         let finalValue = value;
 
-        // CRITICAL CHECK: ONLY convert to boolean if the field is 'attending'.
-        if (field === "attending") {
-          // This correctly handles the "true" or "false" string values from radio buttons
+        // Convert string "true"/"false" from radio buttons to actual booleans
+        if (field === "attending" || field === "welcome_party") {
           finalValue = value === "true";
         }
-        // If the field is "dietary_restrictions", finalValue remains the text string 'value'.
 
         return guest.id === guestId ? { ...guest, [field]: finalValue } : guest;
       }),
@@ -88,6 +86,7 @@ function Rsvp() {
           },
           body: JSON.stringify({
             attending: guest.attending,
+            welcome_party: guest.welcome_party, // Includes the new field
             dietary_restrictions: guest.dietary_restrictions,
           }),
         }),
@@ -97,8 +96,6 @@ function Rsvp() {
       const responses = await Promise.all(updatePromises);
       for (const response of responses) {
         if (!response.ok) {
-          // You'll need to handle which specific request failed
-          // For simplicity, we'll just throw a generic error for now
           throw new Error("One or more RSVP updates failed.");
         }
       }
@@ -147,11 +144,18 @@ function Rsvp() {
       <p>Please confirm your attendance for each member of your party.</p>
       <form onSubmit={handleSubmit}>
         {partyGuests.map((guest) => (
-          <div key={guest.id}>
-            <h4>
+          <div key={guest.id} className="guest-rsvp-section">
+            <h4
+              style={{ borderBottom: "1px solid #ccc", paddingBottom: "5px" }}
+            >
               {guest.first_name} {guest.last_name}
             </h4>
-            <div>
+
+            {/* Wedding Ceremony Question */}
+            <div style={{ marginBottom: "15px" }}>
+              <p style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                Attending the Wedding Ceremony & Reception?
+              </p>
               <label>
                 <input
                   type="radio"
@@ -177,9 +181,49 @@ function Rsvp() {
                 No, with regret.
               </label>
             </div>
+
+            {/* Friday Welcome Party Question */}
+            <div style={{ marginBottom: "15px" }}>
+              <p style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                Attending the Friday Welcome Party?
+              </p>
+              <label>
+                <input
+                  type="radio"
+                  name={`welcome-${guest.id}`}
+                  value="true"
+                  checked={guest.welcome_party === true}
+                  onChange={() =>
+                    handleRsvpChange(guest.id, "welcome_party", "true")
+                  }
+                />
+                Yes!
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name={`welcome-${guest.id}`}
+                  value="false"
+                  checked={guest.welcome_party === false}
+                  onChange={() =>
+                    handleRsvpChange(guest.id, "welcome_party", "false")
+                  }
+                />
+                No.
+              </label>
+            </div>
+
+            {/* Dietary Restrictions (Only shows if attending the wedding) */}
             {guest.attending && (
-              <div>
-                <label htmlFor={`dietary-${guest.id}`}>
+              <div style={{ marginBottom: "15px" }}>
+                <label
+                  htmlFor={`dietary-${guest.id}`}
+                  style={{
+                    fontWeight: "bold",
+                    display: "block",
+                    marginBottom: "5px",
+                  }}
+                >
                   Dietary Restrictions:
                 </label>
                 <textarea
@@ -192,12 +236,15 @@ function Rsvp() {
                       e.target.value,
                     )
                   }
+                  style={{ width: "100%", minHeight: "60px" }}
                 />
               </div>
             )}
           </div>
         ))}
-        <button type="submit">Submit RSVP</button>
+        <button type="submit" style={{ marginTop: "20px" }}>
+          Submit RSVP
+        </button>
       </form>
     </div>
   );
