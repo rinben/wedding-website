@@ -31,9 +31,9 @@ function About() {
             whether he is playing video games or creating websites. He also
             enjoys movies and music. Ben loves to show me all of his nerdy
             movies and some of them I even enjoy. Ben played baritone and tuba
-            in marching band. Ben works as a Math/Music teacher aide in a school
+            in marching band. Ben works as a math teacher in a school
             that specializes in behavior disabilities. He now helps teach
-            students to appreciate music through guitar, piano, and modern band.
+            students to believe in themselves and be good at learning math.
             When he is not working you can find him playing on his computer or
             camping on the weekend. His love for camping has rubbed off onto me
             as well. Ben is an excellent listener and is always willing to help.
