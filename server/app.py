@@ -83,6 +83,8 @@ class ClaimLog(db.Model):
     item_id = db.Column(db.Integer, db.ForeignKey("registry_item.id"), nullable=False)
     timestamp = db.Column(db.DateTime, server_default=db.func.now())
     ip_address = db.Column(db.String(45))
+    guest_name = db.Column(db.String(150), nullable=True)
+    note = db.Column(db.Text, nullable=True)
 
 
 # --- HELPERS ---
@@ -519,18 +521,54 @@ def claim_registry_item(item_id):
         item = db.session.get(RegistryItem, item_id)
         if not item:
             return jsonify(message="Registry item not found"), 404
+
+        data = request.json or {}
+        guest_name = data.get('guest_name', 'Anonymous')
+        note = data.get('note', '')
+
         if item.status == "FULFILLED" or item.quantity_claimed >= item.quantity_needed:
             return jsonify(message="This item is already claimed or fulfilled."), 409
+
         item.quantity_claimed += 1
         if item.quantity_claimed >= item.quantity_needed:
             item.status = "FULFILLED"
         else:
             item.status = "CLAIMED"
         item.last_claimed = datetime.utcnow()
+
         ip_address = request.headers.get("X-Forwarded-For", request.remote_addr)
-        new_log = ClaimLog(item_id=item.id, ip_address=ip_address)
+
+        new_log = ClaimLog(
+            item_id=item.id,
+            ip_address=ip_address,
+            guest_name=guest_name,
+            note=note
+        )
         db.session.add(new_log)
         db.session.commit()
+
+        import smtplib
+        from email.mime.text import MIMEText
+
+        mail_user = os.environ.get('MAIL_USERNAME')
+        mail_pass = os.environ.get('MAIL_PASSWORD')
+
+        if mail_user and mail_pass:
+            try:
+                email_body = f"Great news!\n\n{guest_name} has claimed '{item.name}' from your registry.\n\nNote from guest:\n{note if note else 'No note provided.'}"
+                msg = MIMEText(email_body)
+                msg['Subject'] = f"New Registry Claim: {item.name}"
+                msg['From'] = mail_user
+                msg['To'] = mail_user # Sending the alert to yourselves
+
+                # Defaulting to Gmail's SSL port.
+                server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+                server.login(mail_user, mail_pass)
+                server.send_message(msg)
+                server.quit()
+            except Exception as e:
+                print(f"Failed to send email notification: {e}")
+
         return jsonify(
             message=f"Successfully claimed 1 unit of {item.name}.",
             status=item.status,
@@ -657,6 +695,18 @@ def update_registry_item(item_id):
             message="An error occurred while updating the registry item"
         ), 500
 
+@app.route('/api/migrate-registry')
+@cross_origin()
+def temporary_registry_migration():
+    """Temporary route to add guest_name and note to ClaimLog."""
+    try:
+        db.session.execute(text('ALTER TABLE claim_log ADD COLUMN guest_name VARCHAR(150);'))
+        db.session.execute(text('ALTER TABLE claim_log ADD COLUMN note TEXT;'))
+        db.session.commit()
+        return jsonify(message="Database updated successfully! New columns added to claim_log."), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(error=f"Migration failed: {str(e)}"), 500
 
 if __name__ == "__main__":
     app.run(debug=(not is_production))

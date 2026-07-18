@@ -44,6 +44,11 @@ function Registry() {
   const [claimItemId, setClaimItemId] = useState(null);
   const [showAddressItem, setShowAddressItem] = useState(null);
 
+  // --- NEW: States for the Name and Note form ---
+  const [showNameForm, setShowNameForm] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const [guestNote, setGuestNote] = useState("");
+
   // Function to fetch the physical items
   const fetchRegistryItems = async () => {
     try {
@@ -72,7 +77,7 @@ function Registry() {
     fetchRegistryItems();
   }, []); // Runs once on mount
 
-  // --- NEW: Function to close the Address Modal if the user cancels purchase ---
+  // Function to close the Address Modal if the user cancels purchase
   const handleCancelPurchase = (item) => {
     // 1. Clear the claim ID from storage, as the purchase was canceled
     localStorage.removeItem("pendingRegistryClaim");
@@ -80,11 +85,12 @@ function Registry() {
     // 2. Clear the address modal state
     setShowAddressItem(null);
 
-    // 3. Clear the claim confirmation state, just in case
+    // 3. Clear the claim confirmation states
     setClaimItemId(null);
+    setShowNameForm(false);
   };
 
-  // --- NEW: Function to handle the successful redirect to vendor site ---
+  // Function to handle the successful redirect to vendor site
   const handleProceedToVendor = (item) => {
     // 1. Hide the Shipping Address Modal
     setShowAddressItem(null);
@@ -117,15 +123,29 @@ function Registry() {
     setShowAddressItem(item);
   };
 
-  // New function to handle the claim confirmation when the user returns (Claim logic step 2)
-  const handleClaimConfirmation = async (isConfirmed) => {
+  // Updated function to handle the claim confirmation step 1
+  const handleClaimConfirmation = (isConfirmed) => {
+    if (isConfirmed) {
+      // Show the next step (Name and Note form)
+      setShowNameForm(true);
+    } else {
+      // User canceled, clear everything
+      localStorage.removeItem("pendingRegistryClaim");
+      setClaimItemId(null);
+      setShowNameForm(false);
+      setGuestName("");
+      setGuestNote("");
+    }
+  };
+
+  // --- NEW: Function to handle the final submission of the claim with name/note ---
+  const handleFinalClaimSubmit = async () => {
     const itemId = claimItemId;
 
-    // 1. Clear the storage regardless of their answer
+    // 1. Clear the storage
     localStorage.removeItem("pendingRegistryClaim");
-    setClaimItemId(null); // Clear the prompt
 
-    if (isConfirmed && itemId) {
+    if (itemId) {
       // --- START: BACKEND CLAIM API CALL ---
       try {
         const response = await fetch(
@@ -135,7 +155,11 @@ function Registry() {
             headers: {
               "Content-Type": "application/json",
             },
-          },
+            body: JSON.stringify({
+              guest_name: guestName,
+              note: guestNote
+            })
+          }
         );
 
         const result = await response.json();
@@ -152,10 +176,12 @@ function Registry() {
       }
       // --- END: BACKEND CLAIM API CALL ---
 
-      // 2. Refresh the registry list to show the new status immediately
+      // 2. Clean up states and refresh the registry list
+      setClaimItemId(null);
+      setShowNameForm(false);
+      setGuestName("");
+      setGuestNote("");
       fetchRegistryItems();
-    } else if (isConfirmed) {
-      alert("Claim failed: Item ID not found.");
     }
   };
 
@@ -288,22 +314,67 @@ function Registry() {
       {claimItemId && (
         <div className="claim-confirmation-modal-overlay">
           <div className="claim-confirmation-card">
-            <h2>Purchase Confirmation</h2>
-            <p>
-              You opened the link to
-              {allItems.find((item) => item.id === claimItemId)?.name ||
-                "an item"}
-              .
-            </p>
-            <p>Did you successfully complete the purchase?</p>
-            <div className="modal-buttons">
-              <button onClick={() => handleClaimConfirmation(true)}>
-                Yes, I purchased it!
-              </button>
-              <button onClick={() => handleClaimConfirmation(false)}>
-                No, I canceled it.
-              </button>
-            </div>
+            {!showNameForm ? (
+              <>
+                <h2>Purchase Confirmation</h2>
+                <p>
+                  You opened the link to{" "}
+                  {allItems.find((item) => item.id == claimItemId)?.name ||
+                    "an item"}
+                  .
+                </p>
+                <p>Did you successfully complete the purchase?</p>
+                <div className="modal-buttons">
+                  <button onClick={() => handleClaimConfirmation(true)}>
+                    Yes, I purchased it!
+                  </button>
+                  <button onClick={() => handleClaimConfirmation(false)}>
+                    No, I canceled it.
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2>Thank You!</h2>
+                <p>Let us know who to thank for the {allItems.find((item) => item.id == claimItemId)?.name || "gift"}!</p>
+
+                <div className="form-group" style={{ marginBottom: "15px", textAlign: "left" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Your Name:</label>
+                  <input
+                    type="text"
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    placeholder="e.g., John & Jane Doe"
+                    required
+                    style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }}
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: "20px", textAlign: "left" }}>
+                  <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Optional Note:</label>
+                  <textarea
+                    value={guestNote}
+                    onChange={(e) => setGuestNote(e.target.value)}
+                    placeholder="Wishing you both the best!"
+                    rows="4"
+                    style={{ width: "100%", padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }}
+                  />
+                </div>
+
+                <div className="modal-buttons">
+                  <button
+                    onClick={handleFinalClaimSubmit}
+                    disabled={!guestName.trim()}
+                    style={{ background: guestName.trim() ? "var(--color-primary)" : "#ccc", cursor: guestName.trim() ? "pointer" : "not-allowed" }}
+                  >
+                    Submit
+                  </button>
+                  <button onClick={() => handleClaimConfirmation(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
