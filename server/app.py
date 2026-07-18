@@ -695,18 +695,6 @@ def update_registry_item(item_id):
             message="An error occurred while updating the registry item"
         ), 500
 
-@app.route('/api/migrate-registry')
-@cross_origin()
-def temporary_registry_migration():
-    """Temporary route to add guest_name and note to ClaimLog."""
-    try:
-        db.session.execute(text('ALTER TABLE claim_log ADD COLUMN guest_name VARCHAR(150);'))
-        db.session.execute(text('ALTER TABLE claim_log ADD COLUMN note TEXT;'))
-        db.session.commit()
-        return jsonify(message="Database updated successfully! New columns added to claim_log."), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify(error=f"Migration failed: {str(e)}"), 500
 
 if __name__ == "__main__":
     app.run(debug=(not is_production))
