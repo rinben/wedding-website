@@ -767,15 +767,6 @@ def confirm_photo():
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-# --- TEMPORARY DB INIT ROUTE ---
-@app.route('/api/init-db')
-def init_db():
-    try:
-        db.create_all()
-        return "Database tables created successfully!", 200
-    except Exception as e:
-        return str(e), 500
-
 
 if __name__ == "__main__":
     app.run(debug=(not is_production))
