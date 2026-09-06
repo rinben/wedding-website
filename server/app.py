@@ -12,6 +12,9 @@ from datetime import timedelta, datetime
 from sqlalchemy.exc import IntegrityError
 from werkzeug.datastructures import FileStorage
 from sqlalchemy import text  # <--- New import for DB migration
+import boto3
+from botocore.config import Config
+import uuid
 
 import io
 import csv
@@ -85,6 +88,13 @@ class ClaimLog(db.Model):
     ip_address = db.Column(db.String(45))
     guest_name = db.Column(db.String(150), nullable=True)
     note = db.Column(db.Text, nullable=True)
+
+class Photo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    image_url = db.Column(db.String(500), nullable=False)
+    guest_name = db.Column(db.String(150), nullable=True)
+    approved = db.Column(db.Boolean, default=False)
+    timestamp = db.Column(db.DateTime, server_default=db.func.now())
 
 
 # --- HELPERS ---
@@ -181,6 +191,16 @@ def scrape_product_info(url):
     except:
         return {"price": None, "image_url": None}
 
+
+# --- R2 / S3 CLIENT SETUP ---
+s3 = boto3.client(
+    "s3",
+    endpoint_url=os.environ.get("R2_ENDPOINT_URL"),
+    aws_access_key_id=os.environ.get("R2_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.environ.get("R2_SECRET_ACCESS_KEY"),
+    config=Config(signature_version="s3v4"),
+    region_name="auto" # Required by boto3, ignored by R2
+)
 
 # --- ROUTES ---
 @app.route("/")
@@ -694,6 +714,67 @@ def update_registry_item(item_id):
         return jsonify(
             message="An error occurred while updating the registry item"
         ), 500
+
+# --- PHOTO SHARING ROUTES ---
+
+@app.route('/api/photos/presigned-url', methods=['POST'])
+def generate_presigned_url():
+    data = request.json
+    filename = data.get('filename')
+    content_type = data.get('contentType')
+    
+    if not filename or not content_type:
+        return jsonify({"error": "Filename and contentType required"}), 400
+
+    # Create a unique filename to prevent overwriting
+    unique_filename = f"{uuid.uuid4().hex}_{filename}"
+    
+    try:
+        presigned_url = s3.generate_presigned_url(
+            'put_object',
+            Params={
+                'Bucket': os.environ.get("R2_BUCKET_NAME"),
+                'Key': unique_filename,
+                'ContentType': content_type
+            },
+            ExpiresIn=3600 # URL expires in 1 hour
+        )
+        
+        public_url = f"{os.environ.get('R2_PUBLIC_URL')}/{unique_filename}"
+        return jsonify({"presigned_url": presigned_url, "public_url": public_url}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/photos/confirm', methods=['POST'])
+def confirm_photo():
+    data = request.json
+    public_url = data.get('public_url')
+    guest_name = data.get('guest_name', 'Anonymous')
+    
+    if not public_url:
+        return jsonify({"error": "Public URL required"}), 400
+
+    try:
+        new_photo = Photo(
+            image_url=public_url,
+            guest_name=guest_name,
+            approved=False # Requires admin approval before displaying
+        )
+        db.session.add(new_photo)
+        db.session.commit()
+        return jsonify({"message": "Photo submitted for approval"}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+# --- TEMPORARY DB INIT ROUTE ---
+@app.route('/api/init-db')
+def init_db():
+    try:
+        db.create_all()
+        return "Database tables created successfully!", 200
+    except Exception as e:
+        return str(e), 500
 
 
 if __name__ == "__main__":
