@@ -98,6 +98,11 @@ export default function AdminPhotoManager({ token }) {
     setSelectedGroup(null);
   };
 
+  const isVideoFile = (url, type) => {
+  if (type === 'video') return true;
+  return typeof url === 'string' && url.match(/\.(mp4|mov|webm|ogg)$/i);
+};
+
   return (
     <div className="admin-photo-manager">
       <h3>Review Guest Uploads</h3>
@@ -149,8 +154,8 @@ export default function AdminPhotoManager({ token }) {
                 <div key={photo.id} className={`review-card ${photo.approved ? 'is-approved' : ''}`}>
                   {/* Thumbnail Click opens Lightbox */}
                   <div className="review-thumbnail" onClick={() => setReviewLightbox(photo)} style={{cursor: 'pointer'}}>
-                    {photo.file_type === 'video' ? (
-                      <video src={photo.image_url} preload="auto" muted /> // Fix: Native playback support
+                    {isVideoFile(photo.image_url, photo.file_type) ? (
+                      <video src={photo.image_url} preload="auto" muted loop autoPlay /> // Fix: Native playback support
                     ) : (
                       <img src={photo.image_url} alt="Uploaded by guest" />
                     )}
@@ -179,7 +184,7 @@ export default function AdminPhotoManager({ token }) {
          <button className="close-btn" onClick={() => setReviewLightbox(null)}>&times;</button>
          
          <div className="lightbox-content">
-           {reviewLightbox.file_type === 'video' ? (
+           {isVideoFile(reviewLightbox.image_url, reviewLightbox.file_type) ? (
              <video src={reviewLightbox.image_url} controls autoPlay playsInline />
            ) : (
               <img src={reviewLightbox.image_url} alt="Full size review" />

@@ -193,6 +193,17 @@ def scrape_product_info(url):
     except:
         return {"price": None, "image_url": None}
 
+def determine_file_type(filename_or_url):
+    if not filename_or_url:
+        return 'image'
+        
+    video_extensions = ('.mp4', '.mov', '.webm', '.ogg', '.mkv', '.avi')
+    # Convert to lowercase to catch .MP4 or .MOV
+    lower_url = filename_or_url.lower()
+    
+    if lower_url.endswith(video_extensions):
+        return 'video'
+    return 'image'
 
 # --- R2 / S3 CLIENT SETUP ---
 s3 = boto3.client(
@@ -763,6 +774,11 @@ def confirm_photo():
     data = request.json
     public_url = data.get('public_url')
     guest_name = data.get('guest_name', 'Anonymous')
+    provided_type = data.get('file_type')
+        if provided_type in ['video', 'image']:
+            final_file_type = provided_type
+        else:
+            final_file_type = determine_file_type(public_url)
     
     if not public_url:
         return jsonify({"error": "Public URL required"}), 400
@@ -771,11 +787,12 @@ def confirm_photo():
         new_photo = Photo(
             image_url=public_url,
             guest_name=guest_name,
+            file_type=final_file_type,
             approved=False # Requires admin approval before displaying
         )
         db.session.add(new_photo)
         db.session.commit()
-        return jsonify({"message": "Photo submitted for approval"}), 201
+        return jsonify({"message": "Upload submitted for approval"}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500

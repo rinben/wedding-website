@@ -196,6 +196,11 @@ export default function Photos() {
     }
   };
 
+  const isVideoFile = (url, type) => {
+  if (type === 'video') return true;
+  return typeof url === 'string' && url.match(/\.(mp4|mov|webm|ogg)$/i);
+};
+
   return (
     <div className="photos-container">
       <div className="photos-header">
@@ -233,7 +238,7 @@ export default function Photos() {
               onClick={() => handleThumbnailClick(photo)}
             >
               {isSelected && <div className="checkmark">✓</div>}
-              {photo.file_type === 'video' ? (
+              {isVideoFile(photo.image_url, photo.file_type) ? (
                 <video src={photo.image_url} autoPlay muted playsInline loop className="gallery-video-thumb" />
               ) : (
                 <img src={photo.image_url} alt="Wedding moment" loading="lazy" />
@@ -267,7 +272,7 @@ export default function Photos() {
           <button className="nav-arrow right" onClick={handleNext} disabled={photos.findIndex(p => p.id === selectedPhoto.id) === photos.length - 1}>&rarr;</button>
 
           <div className="lightbox-content">
-            {selectedPhoto.file_type === 'video' ? (
+            {isVideoFile(selectedPhoto.image_url, selectedPhoto.file_type) ? (
               <video src={selectedPhoto.image_url} controls autoPlay playsInline />
             ) : (
                <img src={selectedPhoto.image_url} alt="Full size" />
