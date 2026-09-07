@@ -1,4 +1,3 @@
-// src/components/Photos.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import imageCompression from 'browser-image-compression';
@@ -20,12 +19,31 @@ export default function Photos() {
   const [selectedForDownload, setSelectedForDownload] = useState([]);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // Initial Load
   useEffect(() => {
     fetchPhotos();
-    // Load local likes to prevent spam
     const savedLikes = JSON.parse(localStorage.getItem('likedPhotos') || '[]');
     setLikedPhotosLocal(savedLikes);
   }, []);
+
+  // Keyboard Navigation for Lightbox
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!selectedPhoto) return;
+      const currentIndex = photos.findIndex(p => p.id === selectedPhoto.id);
+      
+      if (e.key === 'ArrowRight' && currentIndex < photos.length - 1) {
+        setSelectedPhoto(photos[currentIndex + 1]);
+      } else if (e.key === 'ArrowLeft' && currentIndex > 0) {
+        setSelectedPhoto(photos[currentIndex - 1]);
+      } else if (e.key === 'Escape') {
+        setSelectedPhoto(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedPhoto, photos]);
 
   const fetchPhotos = async () => {
     try {
@@ -78,7 +96,6 @@ export default function Photos() {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
-  // Fix 4: Like Toggle logic
   const handleLike = async (photoId, e) => {
     if(e) e.stopPropagation();
     const isLiked = likedPhotosLocal.includes(photoId);
@@ -114,7 +131,6 @@ export default function Photos() {
     }
   };
 
-  // Fix 5: Actual Download (Forces browser to download rather than open new tab)
   const handleSingleDownload = async (url, e) => {
     if(e) e.stopPropagation();
     try {
@@ -129,12 +145,10 @@ export default function Photos() {
       link.remove();
       window.URL.revokeObjectURL(blobUrl);
     } catch(err) {
-      // Fallback if CORS blocks the blob fetch for any reason
       window.open(url, '_blank');
     }
   };
 
-  // Fix 6: Mass Download using JSZip
   const handleMassDownload = async () => {
     setIsDownloading(true);
     const zip = new JSZip();
@@ -159,7 +173,7 @@ export default function Photos() {
     setSelectedForDownload([]);
   };
 
-  // Fix 3: Next & Prev Arrows Logic
+  // On-screen button navigation
   const handleNext = (e) => {
     if(e) e.stopPropagation();
     const currentIndex = photos.findIndex(p => p.id === selectedPhoto.id);
@@ -187,7 +201,6 @@ export default function Photos() {
       <div className="photos-header">
         <h2>Wedding Gallery</h2>
         <div className="header-actions">
-          {/* Fix 6: Select Mode Toggle */}
           <button 
             onClick={() => { setIsSelectMode(!isSelectMode); setSelectedForDownload([]); }} 
             className="secondary-btn"
@@ -210,7 +223,6 @@ export default function Photos() {
         </div>
       )}
 
-      {/* CSS Grid Gallery */}
       <div className="photo-grid">
         {photos.map(photo => {
           const isSelected = selectedForDownload.includes(photo.id);
@@ -222,8 +234,7 @@ export default function Photos() {
             >
               {isSelected && <div className="checkmark">✓</div>}
               {photo.file_type === 'video' ? (
-                // Fix 2: Muted Autoplay loop makes it act like a GIF thumbnail
-                <video src={photo.image_url} autoPlay muted playsInline loop />
+                <video src={photo.image_url} autoPlay muted playsInline loop className="gallery-video-thumb" />
               ) : (
                 <img src={photo.image_url} alt="Wedding moment" loading="lazy" />
               )}
@@ -233,7 +244,6 @@ export default function Photos() {
         {photos.length === 0 && <p>No photos have been approved yet. Be the first to share!</p>}
       </div>
 
-      {/* Upload Modal */}
       {isUploadOpen && (
         <div className="modal-overlay" style={{zIndex: 1100}}>
           <div className="modal-content">
@@ -249,12 +259,10 @@ export default function Photos() {
         </div>
       )}
 
-      {/* Lightbox / Full-size Modal */}
       {selectedPhoto && !isSelectMode && (
         <div className="lightbox-overlay">
           <button className="close-btn" onClick={() => setSelectedPhoto(null)}>&times;</button>
           
-          {/* Fix 3: Navigation Arrows */}
           <button className="nav-arrow left" onClick={handlePrev} disabled={photos.findIndex(p => p.id === selectedPhoto.id) === 0}>&larr;</button>
           <button className="nav-arrow right" onClick={handleNext} disabled={photos.findIndex(p => p.id === selectedPhoto.id) === photos.length - 1}>&rarr;</button>
 

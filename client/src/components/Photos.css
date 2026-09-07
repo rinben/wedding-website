@@ -46,6 +46,14 @@
   transform: scale(1.05);
 }
 
+.photo-thumbnail video.gallery-video-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none; /* Prevents play/pause clicks interfering with lightbox trigger */
+  background: #000;
+}
+
 /* Modals */
 .modal-overlay, .lightbox-overlay {
   position: fixed;
@@ -142,8 +150,13 @@
 
 /* Fix 1: Red Box around Share button */
 .upload-btn {
-  border: 2px solid #ff4d4d; /* Bright red border */
-  box-shadow: 0 0 8px rgba(255, 77, 77, 0.4);
+  background-color: var(--color-secondary);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 /* Fix 6: Selection Mode & Batch Download */
