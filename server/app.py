@@ -784,7 +784,14 @@ def confirm_photo():
 @app.route('/api/photos/<int:photo_id>/like', methods=['PATCH'])
 def like_photo(photo_id):
     photo = Photo.query.get_or_404(photo_id)
-    photo.likes += 1
+    data = request.json or {}
+    action = data.get('action', 'like')
+    
+    if action == 'unlike' and photo.likes > 0:
+        photo.likes -= 1
+    else:
+        photo.likes += 1
+        
     db.session.commit()
     return jsonify({"likes": photo.likes}), 200
 

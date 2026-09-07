@@ -75,3 +75,6 @@
 .approve-btn { background-color: #4A5D23; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
 .delete-btn { background-color: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
 .btn-secondary { background-color: #6b7280; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+
+.review-thumbnail { position: relative; }
+.expand-overlay { position: absolute; bottom: 15px; right: 5px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; font-size: 12px; border-radius: 4px; pointer-events: none;}

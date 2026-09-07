@@ -6,6 +6,7 @@ import './AdminPhotoManager.css';
 export default function AdminPhotoManager({ token }) {
   const [photos, setPhotos] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [reviewLightbox, setReviewLightbox] = useState(null); // Fix: Admin Lightbox State
 
   useEffect(() => {
     fetchPhotos();
@@ -22,19 +23,12 @@ export default function AdminPhotoManager({ token }) {
     }
   };
 
-  // Group photos by Guest Name + Hour (e.g., "Sara_2026-09-12T14")
   const groupedPhotos = photos.reduce((acc, photo) => {
     const timeKey = photo.timestamp.substring(0, 13); 
     const key = `${photo.guest_name}_${timeKey}`;
     
     if (!acc[key]) {
-      acc[key] = {
-        id: key,
-        guest_name: photo.guest_name,
-        timestamp: photo.timestamp,
-        items: [],
-        allApproved: true
-      };
+      acc[key] = { id: key, guest_name: photo.guest_name, timestamp: photo.timestamp, items: [], allApproved: true };
     }
     acc[key].items.push(photo);
     if (!photo.approved) acc[key].allApproved = false;
@@ -51,12 +45,14 @@ export default function AdminPhotoManager({ token }) {
     });
     fetchPhotos();
     
-    // Update local modal state instantly
     if (selectedGroup) {
       setSelectedGroup(prev => ({
         ...prev,
         items: prev.items.map(p => p.id === photoId ? { ...p, approved: !currentStatus } : p)
       }));
+    }
+    if (reviewLightbox && reviewLightbox.id === photoId) {
+       setReviewLightbox(prev => ({ ...prev, approved: !currentStatus }));
     }
   };
 
@@ -74,6 +70,7 @@ export default function AdminPhotoManager({ token }) {
         items: prev.items.filter(p => p.id !== photoId)
       }));
     }
+    setReviewLightbox(null); // Close lightbox if item is deleted
   };
 
   const approveAll = async (items) => {
@@ -86,7 +83,7 @@ export default function AdminPhotoManager({ token }) {
       })
     ));
     fetchPhotos();
-    setSelectedGroup(null); // Close modal on batch success
+    setSelectedGroup(null); 
   };
 
   const denyAll = async (items) => {
@@ -134,6 +131,7 @@ export default function AdminPhotoManager({ token }) {
         </tbody>
       </table>
 
+      {/* Group Review Modal */}
       {selectedGroup && (
         <div className="modal-overlay">
           <div className="modal-content large-modal">
@@ -149,11 +147,15 @@ export default function AdminPhotoManager({ token }) {
             <div className="review-grid">
               {selectedGroup.items.map(photo => (
                 <div key={photo.id} className={`review-card ${photo.approved ? 'is-approved' : ''}`}>
-                  {photo.file_type === 'video' ? (
-                    <video src={photo.image_url} controls preload="metadata" />
-                  ) : (
-                    <img src={photo.image_url} alt="Uploaded by guest" />
-                  )}
+                  {/* Thumbnail Click opens Lightbox */}
+                  <div className="review-thumbnail" onClick={() => setReviewLightbox(photo)} style={{cursor: 'pointer'}}>
+                    {photo.file_type === 'video' ? (
+                      <video src={photo.image_url} preload="auto" muted /> // Fix: Native playback support
+                    ) : (
+                      <img src={photo.image_url} alt="Uploaded by guest" />
+                    )}
+                    <div className="expand-overlay">🔍 Click to enlarge</div>
+                  </div>
                   <div className="card-actions">
                     <button 
                       className={photo.approved ? "btn-secondary" : "approve-btn"}
@@ -169,6 +171,36 @@ export default function AdminPhotoManager({ token }) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* FIX: New Admin Lightbox */}
+      {reviewLightbox && (
+         <div className="lightbox-overlay" style={{ zIndex: 1100 }}>
+         <button className="close-btn" onClick={() => setReviewLightbox(null)}>&times;</button>
+         
+         <div className="lightbox-content">
+           {reviewLightbox.file_type === 'video' ? (
+             <video src={reviewLightbox.image_url} controls autoPlay playsInline />
+           ) : (
+              <img src={reviewLightbox.image_url} alt="Full size review" />
+           )}
+           
+           <div className="lightbox-controls">
+             <p>File from: {reviewLightbox.guest_name}</p>
+             <div className="lightbox-actions">
+                <button 
+                   className={reviewLightbox.approved ? "btn-secondary" : "approve-btn"}
+                   onClick={() => toggleApproval(reviewLightbox.id, reviewLightbox.approved)}
+                 >
+                   {reviewLightbox.approved ? "Unapprove" : "Approve"}
+                 </button>
+                 <button className="delete-btn" onClick={() => deletePhoto(reviewLightbox.id)}>
+                   Delete
+                 </button>
+             </div>
+           </div>
+         </div>
+       </div>
       )}
     </div>
   );

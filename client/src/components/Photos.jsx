@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import imageCompression from 'browser-image-compression';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 import { API_BASE_URL } from '../config';
 import './Photos.css';
 
@@ -11,20 +13,24 @@ export default function Photos() {
   const [guestName, setGuestName] = useState('');
   const [uploadStatus, setUploadStatus] = useState('');
   
-  // Lightbox State
+  // Feature States
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [likedPhotosLocal, setLikedPhotosLocal] = useState([]);
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedForDownload, setSelectedForDownload] = useState([]);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     fetchPhotos();
+    // Load local likes to prevent spam
+    const savedLikes = JSON.parse(localStorage.getItem('likedPhotos') || '[]');
+    setLikedPhotosLocal(savedLikes);
   }, []);
 
   const fetchPhotos = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/photos`);
-      if (res.ok) {
-        const data = await res.json();
-        setPhotos(data);
-      }
+      if (res.ok) setPhotos(await res.json());
     } catch (err) {
       console.error("Failed to fetch photos:", err);
     }
@@ -32,19 +38,16 @@ export default function Photos() {
 
   const onDrop = useCallback(async (acceptedFiles) => {
     setUploadStatus('Processing files...');
-    
     for (const file of acceptedFiles) {
       try {
         let fileToUpload = file;
         const isVideo = file.type.startsWith('video/');
 
-        // Only compress images. Videos upload as-is.
         if (!isVideo) {
           const options = { maxSizeMB: 2, maxWidthOrHeight: 1920, useWebWorker: true };
           fileToUpload = await imageCompression(file, options);
         }
 
-        // 1. Get R2 Presigned URL from Flask
         setUploadStatus(`Securing upload link for ${file.name}...`);
         const urlRes = await fetch(`${API_BASE_URL}/api/photos/presigned-url`, {
           method: 'POST',
@@ -53,7 +56,6 @@ export default function Photos() {
         });
         const { presigned_url, public_url } = await urlRes.json();
 
-        // 2. Upload directly to Cloudflare R2
         setUploadStatus(`Uploading ${file.name} to gallery...`);
         await fetch(presigned_url, {
           method: 'PUT',
@@ -61,19 +63,12 @@ export default function Photos() {
           body: fileToUpload
         });
 
-        // 3. Confirm with Flask Database
         await fetch(`${API_BASE_URL}/api/photos/confirm`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            public_url, 
-            guest_name: guestName || 'Anonymous',
-            file_type: isVideo ? 'video' : 'image'
-          })
+          body: JSON.stringify({ public_url, guest_name: guestName || 'Anonymous', file_type: isVideo ? 'video' : 'image' })
         });
-
       } catch (error) {
-        console.error("Upload error:", error);
         setUploadStatus(`Error uploading ${file.name}.`);
         return;
       }
@@ -83,12 +78,32 @@ export default function Photos() {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
-  const handleLike = async (photoId) => {
+  // Fix 4: Like Toggle logic
+  const handleLike = async (photoId, e) => {
+    if(e) e.stopPropagation();
+    const isLiked = likedPhotosLocal.includes(photoId);
+    const action = isLiked ? 'unlike' : 'like';
+
     try {
-      const res = await fetch(`${API_BASE_URL}/api/photos/${photoId}/like`, { method: 'PATCH' });
+      const res = await fetch(`${API_BASE_URL}/api/photos/${photoId}/like`, { 
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
+      });
+      
       if (res.ok) {
         const { likes } = await res.json();
-        // Update local state to reflect the new like count instantly
+        
+        let updatedLocalLikes;
+        if (isLiked) {
+          updatedLocalLikes = likedPhotosLocal.filter(id => id !== photoId);
+        } else {
+          updatedLocalLikes = [...likedPhotosLocal, photoId];
+        }
+        
+        setLikedPhotosLocal(updatedLocalLikes);
+        localStorage.setItem('likedPhotos', JSON.stringify(updatedLocalLikes));
+        
         setPhotos(photos.map(p => p.id === photoId ? { ...p, likes } : p));
         if (selectedPhoto && selectedPhoto.id === photoId) {
           setSelectedPhoto({ ...selectedPhoto, likes });
@@ -99,66 +114,153 @@ export default function Photos() {
     }
   };
 
-  const handleDownload = (url) => {
-    // Opens image in new tab to allow mobile/desktop download
-    window.open(url, '_blank');
+  // Fix 5: Actual Download (Forces browser to download rather than open new tab)
+  const handleSingleDownload = async (url, e) => {
+    if(e) e.stopPropagation();
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = url.split('/').pop() || 'wedding-memory.jpg';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch(err) {
+      // Fallback if CORS blocks the blob fetch for any reason
+      window.open(url, '_blank');
+    }
+  };
+
+  // Fix 6: Mass Download using JSZip
+  const handleMassDownload = async () => {
+    setIsDownloading(true);
+    const zip = new JSZip();
+    const urlsToDownload = photos.filter(p => selectedForDownload.includes(p.id));
+
+    try {
+      for (let i = 0; i < urlsToDownload.length; i++) {
+        const photo = urlsToDownload[i];
+        const response = await fetch(photo.image_url);
+        const blob = await response.blob();
+        const filename = photo.image_url.split('/').pop() || `photo_${i}.jpg`;
+        zip.file(filename, blob);
+      }
+      const content = await zip.generateAsync({ type: 'blob' });
+      saveAs(content, "Wedding_Photos.zip");
+    } catch (err) {
+      alert("Error generating zip file. Some files may be too large.");
+    }
+    
+    setIsDownloading(false);
+    setIsSelectMode(false);
+    setSelectedForDownload([]);
+  };
+
+  // Fix 3: Next & Prev Arrows Logic
+  const handleNext = (e) => {
+    if(e) e.stopPropagation();
+    const currentIndex = photos.findIndex(p => p.id === selectedPhoto.id);
+    if (currentIndex < photos.length - 1) setSelectedPhoto(photos[currentIndex + 1]);
+  };
+
+  const handlePrev = (e) => {
+    if(e) e.stopPropagation();
+    const currentIndex = photos.findIndex(p => p.id === selectedPhoto.id);
+    if (currentIndex > 0) setSelectedPhoto(photos[currentIndex - 1]);
+  };
+
+  const handleThumbnailClick = (photo) => {
+    if (isSelectMode) {
+      setSelectedForDownload(prev => 
+        prev.includes(photo.id) ? prev.filter(id => id !== photo.id) : [...prev, photo.id]
+      );
+    } else {
+      setSelectedPhoto(photo);
+    }
   };
 
   return (
     <div className="photos-container">
       <div className="photos-header">
         <h2>Wedding Gallery</h2>
-        <button onClick={() => setIsUploadOpen(true)} className="upload-btn">
-          Share Your Photos
-        </button>
+        <div className="header-actions">
+          {/* Fix 6: Select Mode Toggle */}
+          <button 
+            onClick={() => { setIsSelectMode(!isSelectMode); setSelectedForDownload([]); }} 
+            className="secondary-btn"
+          >
+            {isSelectMode ? 'Cancel Selection' : 'Select Photos'}
+          </button>
+          
+          <button onClick={() => setIsUploadOpen(true)} className="upload-btn">
+            Share Your Photos
+          </button>
+        </div>
       </div>
+
+      {isSelectMode && selectedForDownload.length > 0 && (
+        <div className="selection-bar">
+          <span>{selectedForDownload.length} items selected</span>
+          <button onClick={handleMassDownload} disabled={isDownloading} className="download-batch-btn">
+            {isDownloading ? 'Zipping Files...' : 'Download Selected'}
+          </button>
+        </div>
+      )}
 
       {/* CSS Grid Gallery */}
       <div className="photo-grid">
-        {photos.map(photo => (
-          <div key={photo.id} className="photo-thumbnail" onClick={() => setSelectedPhoto(photo)}>
-            {photo.file_type === 'video' ? (
-              <video src={photo.image_url} muted loop />
-            ) : (
-              <img src={photo.image_url} alt="Wedding moment" loading="lazy" />
-            )}
-          </div>
-        ))}
+        {photos.map(photo => {
+          const isSelected = selectedForDownload.includes(photo.id);
+          return (
+            <div 
+              key={photo.id} 
+              className={`photo-thumbnail ${isSelectMode ? 'selectable' : ''} ${isSelected ? 'selected' : ''}`} 
+              onClick={() => handleThumbnailClick(photo)}
+            >
+              {isSelected && <div className="checkmark">✓</div>}
+              {photo.file_type === 'video' ? (
+                // Fix 2: Muted Autoplay loop makes it act like a GIF thumbnail
+                <video src={photo.image_url} autoPlay muted playsInline loop />
+              ) : (
+                <img src={photo.image_url} alt="Wedding moment" loading="lazy" />
+              )}
+            </div>
+          )
+        })}
         {photos.length === 0 && <p>No photos have been approved yet. Be the first to share!</p>}
       </div>
 
-      {/* Upload Modal Overlay */}
+      {/* Upload Modal */}
       {isUploadOpen && (
-        <div className="modal-overlay">
+        <div className="modal-overlay" style={{zIndex: 1100}}>
           <div className="modal-content">
             <button className="close-btn" onClick={() => { setIsUploadOpen(false); setUploadStatus(''); }}>&times;</button>
             <h3>Upload Memories</h3>
-            <input 
-              type="text" 
-              placeholder="Your Name (optional)" 
-              value={guestName} 
-              onChange={e => setGuestName(e.target.value)}
-              className="name-input"
-            />
-            
+            <input type="text" placeholder="Your Name (optional)" value={guestName} onChange={e => setGuestName(e.target.value)} className="name-input" />
             <div {...getRootProps()} className={`dropzone ${isDragActive ? 'active' : ''}`}>
               <input {...getInputProps()} />
               <p>Drag & drop photos/videos here, or click to select files</p>
             </div>
-            
             {uploadStatus && <p className="upload-status">{uploadStatus}</p>}
           </div>
         </div>
       )}
 
       {/* Lightbox / Full-size Modal */}
-      {selectedPhoto && (
+      {selectedPhoto && !isSelectMode && (
         <div className="lightbox-overlay">
           <button className="close-btn" onClick={() => setSelectedPhoto(null)}>&times;</button>
           
+          {/* Fix 3: Navigation Arrows */}
+          <button className="nav-arrow left" onClick={handlePrev} disabled={photos.findIndex(p => p.id === selectedPhoto.id) === 0}>&larr;</button>
+          <button className="nav-arrow right" onClick={handleNext} disabled={photos.findIndex(p => p.id === selectedPhoto.id) === photos.length - 1}>&rarr;</button>
+
           <div className="lightbox-content">
             {selectedPhoto.file_type === 'video' ? (
-              <video src={selectedPhoto.image_url} controls autoPlay />
+              <video src={selectedPhoto.image_url} controls autoPlay playsInline />
             ) : (
                <img src={selectedPhoto.image_url} alt="Full size" />
             )}
@@ -166,10 +268,13 @@ export default function Photos() {
             <div className="lightbox-controls">
               <p>Uploaded by: {selectedPhoto.guest_name}</p>
               <div className="lightbox-actions">
-                <button onClick={() => handleLike(selectedPhoto.id)}>
+                <button 
+                  onClick={(e) => handleLike(selectedPhoto.id, e)}
+                  className={`like-btn ${likedPhotosLocal.includes(selectedPhoto.id) ? 'liked' : ''}`}
+                >
                   ♥ {selectedPhoto.likes}
                 </button>
-                <button onClick={() => handleDownload(selectedPhoto.image_url)}>
+                <button onClick={(e) => handleSingleDownload(selectedPhoto.image_url, e)}>
                   Download
                 </button>
               </div>
