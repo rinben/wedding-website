@@ -775,10 +775,10 @@ def confirm_photo():
     public_url = data.get('public_url')
     guest_name = data.get('guest_name', 'Anonymous')
     provided_type = data.get('file_type')
-        if provided_type in ['video', 'image']:
-            final_file_type = provided_type
-        else:
-            final_file_type = determine_file_type(public_url)
+    if provided_type in ['video', 'image']:
+        final_file_type = provided_type
+    else:
+        final_file_type = determine_file_type(public_url)
     
     if not public_url:
         return jsonify({"error": "Public URL required"}), 400
