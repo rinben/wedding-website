@@ -2,15 +2,16 @@
 import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import { useAuth } from "../context/AuthContext";
-import AdminRegistryManager from "./AdminRegistryManager"; // New import
+import AdminRegistryManager from "./AdminRegistryManager";
+import AdminPhotoManager from "./AdminPhotoManager"; // Imported new component
 import "./AdminDashboard.css";
 
 function AdminDashboard() {
   const [guests, setGuests] = useState([]);
-  const [registryItems, setRegistryItems] = useState([]); // New state for registry items
+  const [registryItems, setRegistryItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentView, setCurrentView] = useState("guests"); // New state for view control
+  const [currentView, setCurrentView] = useState("guests"); 
   const [editingRegistryItem, setEditingRegistryItem] = useState(null);
 
   const [form, setForm] = useState({
@@ -51,7 +52,6 @@ function AdminDashboard() {
 
   const fetchRegistryItems = async () => {
     try {
-      // Public endpoint, no auth required for GET
       const response = await fetch(`${API_BASE_URL}/api/registry`);
       if (!response.ok) {
         throw new Error(`Registry HTTP error! status: ${response.status}`);
@@ -63,7 +63,6 @@ function AdminDashboard() {
     }
   };
 
-  // Combined data fetching
   const fetchData = async () => {
     if (!token) return;
     setLoading(true);
@@ -80,11 +79,9 @@ function AdminDashboard() {
   const handleEditItemLookup = async () => {
     if (!editingRegistryItem || !editingRegistryItem.link) return;
 
-    // Use the existing token and API base URL
     const token = localStorage.getItem("access_token");
     const url = editingRegistryItem.link;
 
-    // Minimal error/status handling for the lookup during edit
     console.log(`Looking up info for: ${url}`);
 
     try {
@@ -103,7 +100,6 @@ function AdminDashboard() {
         alert(
           `Lookup successful. Price: $${result.price || "N/A"}. Image URL found.`,
         );
-        // Update the local editing state immediately
         setEditingRegistryItem((prev) => ({
           ...prev,
           price: result.price || prev.price,
@@ -119,7 +115,6 @@ function AdminDashboard() {
   };
 
   const handleEditRegistry = (item) => {
-    // Save the entire item object into the editing state
     setEditingRegistryItem({ ...item });
   };
 
@@ -151,8 +146,8 @@ function AdminDashboard() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      setEditingRegistryItem(null); // Close the form
-      await fetchRegistryItems(); // Refresh the list
+      setEditingRegistryItem(null);
+      await fetchRegistryItems();
     } catch (error) {
       console.error("Failed to save registry changes:", error);
       setError(error);
@@ -163,7 +158,6 @@ function AdminDashboard() {
     setEditingRegistryItem(null);
   };
 
-  // New function to handle deletion of a registry item
   const handleDeleteItem = async (itemId) => {
     if (!window.confirm("Are you sure you want to delete this registry item?"))
       return;
@@ -183,7 +177,6 @@ function AdminDashboard() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Refresh the registry list after deletion
       await fetchRegistryItems();
     } catch (error) {
       console.error(`Failed to delete item:`, error);
@@ -191,7 +184,6 @@ function AdminDashboard() {
     }
   };
 
-  // Function to mark an item as fulfilled (admin side)
   const handleUpdateItemStatus = async (itemId, status) => {
     if (
       !window.confirm(
@@ -216,7 +208,7 @@ function AdminDashboard() {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      await fetchRegistryItems(); // Only refresh the registry list
+      await fetchRegistryItems();
     } catch (error) {
       console.error(`Failed to update item status:`, error);
       setError(error);
@@ -254,7 +246,7 @@ function AdminDashboard() {
         attending: false,
         dietary_restrictions: "",
       });
-      fetchGuests(); // Refresh the list
+      fetchGuests();
     } catch (error) {
       console.error("Failed to add guest:", error);
       setError(error);
@@ -276,7 +268,7 @@ function AdminDashboard() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      fetchGuests(); // Refresh the list
+      fetchGuests();
     } catch (error) {
       console.error("Failed to delete guest:", error);
       setError(error);
@@ -306,7 +298,7 @@ function AdminDashboard() {
       }
 
       setSelectedGuests([]);
-      fetchGuests(); // Refresh the list
+      fetchGuests();
     } catch (error) {
       console.error("Failed to delete guests:", error);
       setError(error);
@@ -355,7 +347,6 @@ function AdminDashboard() {
 
   const handleEditSave = async () => {
     try {
-      // Check if party ID has changed
       if (editingGuest.party_id !== originalPartyId) {
         const shouldUpdateParty = window.confirm(
           `The party ID for this guest has changed. Would you like to update all guests in the original party (ID: ${originalPartyId}) to the new party ID (${editingGuest.party_id})?`,
@@ -393,7 +384,7 @@ function AdminDashboard() {
       }
 
       setEditingGuest(null);
-      fetchGuests(); // Refresh the list
+      fetchGuests();
     } catch (error) {
       console.error("Failed to save guest changes:", error);
       setError(error);
@@ -444,8 +435,8 @@ function AdminDashboard() {
       }
 
       alert("Guest list imported successfully!");
-      e.target.value = null; // Clear the input
-      fetchGuests(); // Refresh the list
+      e.target.value = null; 
+      fetchGuests();
     } catch (error) {
       console.error("Failed to import guest list:", error);
       setError(error);
@@ -470,15 +461,13 @@ function AdminDashboard() {
   });
 
   if (!token) return <div>Please log in to view this page.</div>;
-  if (loading) return <div>Loading guests...</div>;
+  if (loading) return <div>Loading data...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
-  // --- RENDERING LOGIC ---
   return (
     <div className="admin-dashboard-container">
       <h2>Admin Dashboard</h2>
 
-      {/* View Selector Buttons */}
       <div className="admin-view-selector">
         <button
           onClick={() => setCurrentView("guests")}
@@ -491,6 +480,12 @@ function AdminDashboard() {
           className={currentView === "registry" ? "active" : ""}
         >
           Registry Management
+        </button>
+        <button
+          onClick={() => setCurrentView("photos")}
+          className={currentView === "photos" ? "active" : ""}
+        >
+          Photo Review
         </button>
         <button onClick={fetchData}>Refresh All Data</button>
       </div>
@@ -701,6 +696,7 @@ function AdminDashboard() {
           )}
         </>
       )}
+
       {currentView === "registry" && (
         <div className="registry-admin-section">
           <AdminRegistryManager onRegistryUpdate={fetchRegistryItems} />
@@ -733,8 +729,7 @@ function AdminDashboard() {
                     ) : (
                       "No URL"
                     )}
-                  </td>{" "}
-                  {/* <-- UPDATED CELL CONTENT */}
+                  </td>
                   <td>
                     <a
                       href={item.link}
@@ -782,7 +777,6 @@ function AdminDashboard() {
             </tbody>
           </table>
 
-          {/* --- REGISTRY EDIT FORM --- */}
           {editingRegistryItem && (
             <div className="edit-guest-form-container">
               <h3>Edit Item: {editingRegistryItem.name}</h3>
@@ -833,7 +827,6 @@ function AdminDashboard() {
                   </button>
                 </div>
               </form>
-              {/* Display Scraped Image Thumbnail (Optional) */}
               {editingRegistryItem.image_url && (
                 <img
                   src={editingRegistryItem.image_url}
@@ -848,6 +841,12 @@ function AdminDashboard() {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {currentView === "photos" && (
+        <div className="photos-admin-section">
+          <AdminPhotoManager token={token} />
         </div>
       )}
     </div>

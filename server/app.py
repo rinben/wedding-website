@@ -718,6 +718,17 @@ def update_registry_item(item_id):
         ), 500
 
 # --- PHOTO SHARING ROUTES ---
+@app.route('/api/photos', methods=['GET'])
+def get_public_photos():
+    # Only return approved photos to the public
+    photos = Photo.query.filter_by(approved=True).order_by(Photo.timestamp.desc()).all()
+    return jsonify([{
+        "id": p.id,
+        "image_url": p.image_url,
+        "guest_name": p.guest_name,
+        "file_type": p.file_type,
+        "likes": p.likes
+    } for p in photos]), 200
 
 @app.route('/api/photos/presigned-url', methods=['POST'])
 def generate_presigned_url():
@@ -776,6 +787,48 @@ def like_photo(photo_id):
     photo.likes += 1
     db.session.commit()
     return jsonify({"likes": photo.likes}), 200
+
+# Fetch all photos (approved and pending) for the admin dashboard
+@app.route('/api/admin/photos', methods=['GET'])
+@jwt_required()
+def admin_get_photos():
+    photos = Photo.query.order_by(Photo.timestamp.desc()).all()
+    return jsonify([{
+        "id": p.id,
+        "image_url": p.image_url,
+        "guest_name": p.guest_name,
+        "file_type": p.file_type,
+        "approved": p.approved,
+        "likes": p.likes,
+        "timestamp": p.timestamp.isoformat()
+    } for p in photos]), 200
+
+# Toggle approval status
+@app.route('/api/admin/photos/<int:photo_id>/approve', methods=['PATCH'])
+@jwt_required()
+def admin_approve_photo(photo_id):
+    photo = Photo.query.get_or_404(photo_id)
+    data = request.json
+    photo.approved = data.get('approved', True)
+    db.session.commit()
+    return jsonify({"message": "Status updated", "approved": photo.approved}), 200
+
+# Permanently delete a photo from the database AND Cloudflare R2
+@app.route('/api/admin/photos/<int:photo_id>', methods=['DELETE'])
+@jwt_required()
+def admin_delete_photo(photo_id):
+    photo = Photo.query.get_or_404(photo_id)
+    
+    try:
+        # Extract the unique filename from the end of the R2 public URL
+        filename = photo.image_url.split('/')[-1]
+        s3.delete_object(Bucket=os.environ.get("R2_BUCKET_NAME"), Key=filename)
+    except Exception as e:
+        print(f"Failed to delete from R2: {e}") # Fails gracefully if file is already gone
+
+    db.session.delete(photo)
+    db.session.commit()
+    return jsonify({"message": "Photo deleted successfully"}), 200
 
 if __name__ == "__main__":
     app.run(debug=(not is_production))
