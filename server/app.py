@@ -93,6 +93,8 @@ class Photo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     image_url = db.Column(db.String(500), nullable=False)
     guest_name = db.Column(db.String(150), nullable=True)
+    file_type = db.Column(db.String(50), default='image') # Tracks if it is an image or video
+    likes = db.Column(db.Integer, default=0) # Tracks heart clicks
     approved = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, server_default=db.func.now())
 
@@ -767,6 +769,23 @@ def confirm_photo():
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
+# Route to handle photo likes
+@app.route('/api/photos/<int:photo_id>/like', methods=['PATCH'])
+def like_photo(photo_id):
+    photo = Photo.query.get_or_404(photo_id)
+    photo.likes += 1
+    db.session.commit()
+    return jsonify({"likes": photo.likes}), 200
+
+# Temporary route to rebuild the empty table with the new columns
+@app.route('/api/init-db')
+def init_db():
+    try:
+        db.metadata.drop_all(db.engine, tables=[Photo.__table__])
+        db.create_all()
+        return "Photo table rebuilt with new columns successfully!", 200
+    except Exception as e:
+        return str(e), 500
 
 if __name__ == "__main__":
     app.run(debug=(not is_production))
