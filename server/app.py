@@ -777,15 +777,5 @@ def like_photo(photo_id):
     db.session.commit()
     return jsonify({"likes": photo.likes}), 200
 
-# Temporary route to rebuild the empty table with the new columns
-@app.route('/api/init-db')
-def init_db():
-    try:
-        db.metadata.drop_all(db.engine, tables=[Photo.__table__])
-        db.create_all()
-        return "Photo table rebuilt with new columns successfully!", 200
-    except Exception as e:
-        return str(e), 500
-
 if __name__ == "__main__":
     app.run(debug=(not is_production))
