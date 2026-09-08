@@ -66,6 +66,11 @@ function NavBar() {
               Registry
             </Link>
           </li>
+          <li>
+            <Link to="/Photos" onClick={() => setIsOpen(false)}>
+              Photos
+            </Link>
+          </li>
           {user && user.isLoggedIn && (
             <li>
               <button onClick={handleLogout}>Logout</button>
