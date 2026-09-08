@@ -85,6 +85,7 @@
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
+  margin: 0.05rem;
 }
 
 .hamburger {
@@ -120,7 +121,7 @@
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 881px) {
   .desktop-title {
     display: none;
   }
